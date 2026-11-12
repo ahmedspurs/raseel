@@ -4,17 +4,17 @@
 set -euo pipefail
 
 INSTALL_DIR="${RASEEL_DIR:-/opt/raseel}"
-REPO="https://raw.githubusercontent.com/ahmedspurs/raseel/main"
+REF="${RASEEL_REF:-main}"
+REPO_URL="https://github.com/ahmedspurs/raseel.git"
 
 command -v docker >/dev/null || { echo "Docker is required: https://docs.docker.com/engine/install/" >&2; exit 1; }
 docker compose version >/dev/null 2>&1 || { echo "Docker Compose v2 is required." >&2; exit 1; }
+command -v git >/dev/null || { echo "git is required." >&2; exit 1; }
 
-mkdir -p "$INSTALL_DIR"
+if [ ! -d "$INSTALL_DIR/.git" ]; then
+  git clone --depth 1 --branch "$REF" "$REPO_URL" "$INSTALL_DIR"
+fi
 cd "$INSTALL_DIR"
-
-[ -f docker-compose.yml ] || curl -fsSL "$REPO/docker-compose.yml" -o docker-compose.yml
-mkdir -p scripts
-[ -f scripts/backup.sh ] || { curl -fsSL "$REPO/scripts/backup.sh" -o scripts/backup.sh; chmod +x scripts/backup.sh; }
 
 if [ ! -f .env ]; then
   DOMAIN="${DOMAIN:-}"
@@ -36,8 +36,13 @@ ENV
   echo "Created $INSTALL_DIR/.env — keep a copy of ENCRYPTION_KEY somewhere safe."
 fi
 
-docker compose pull
-docker compose up -d
+# Use published images when available; otherwise build them on this server.
+if docker compose pull --quiet 2>/dev/null; then
+  docker compose up -d
+else
+  echo "Prebuilt images not available; building on this server (this takes a few minutes)…"
+  docker compose up -d --build
+fi
 
 DOMAIN_VALUE=$(grep '^DOMAIN=' .env | cut -d= -f2-)
 echo
