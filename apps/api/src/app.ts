@@ -8,6 +8,7 @@ import Fastify, { type FastifyServerOptions } from 'fastify'
 import { ZodError } from 'zod'
 import type { AppContext } from './context.js'
 import { authPlugin } from './plugins/auth.js'
+import { attachRealtime } from './realtime.js'
 import { authRoutes } from './routes/auth.js'
 import { conversationRoutes, mediaRoutes } from './routes/conversations.js'
 import { healthRoutes } from './routes/health.js'
@@ -86,6 +87,8 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(mediaRoutes, { prefix: '/api/media' })
   await app.register(noteRoutes, { prefix: '/api' })
   await app.register(webhookRoutes, { prefix: '/webhooks' })
+
+  attachRealtime(app)
 
   return app
 }

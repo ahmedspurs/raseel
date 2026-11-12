@@ -8,7 +8,7 @@ import {
 } from '@raseel/shared'
 import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
-import type { Contact, Conversation, Message, User } from '../lib/db.js'
+import type { Contact, Conversation, Db, Message, User } from '../lib/db.js'
 import { currentUser, requirePermission } from '../plugins/auth.js'
 import { AssignmentError, conversationWhere } from '../services/assignment.js'
 import { OutboundError } from '../services/outbound.js'
@@ -66,6 +66,30 @@ export function messageDto(
     sentBy: m.sentBy ? { id: m.sentBy.id, name: m.sentBy.name } : null,
     createdAt: m.createdAt,
   }
+}
+
+/** Loads one message as the client sees it, including what it replies to. */
+export async function loadMessageDto(db: Db, messageId: string) {
+  const m = await db.message.findUnique({
+    where: { id: messageId },
+    include: { sentBy: { select: { id: true, name: true } } },
+  })
+  if (!m) return null
+  const target = m.replyToWaId
+    ? await db.message.findUnique({
+        where: { waMessageId: m.replyToWaId },
+        select: { id: true, body: true, type: true },
+      })
+    : null
+  return messageDto(m, target)
+}
+
+export async function loadConversationDto(db: Db, conversationId: string) {
+  const c = await db.conversation.findUnique({
+    where: { id: conversationId },
+    include: { contact: true },
+  })
+  return c ? conversationDto(c) : null
 }
 
 export const conversationRoutes: FastifyPluginAsync = async (app) => {
