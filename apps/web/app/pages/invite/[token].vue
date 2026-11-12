@@ -55,11 +55,11 @@ async function submit() {
       <form class="card space-y-4 p-6" @submit.prevent="submit">
         <div>
           <label class="label">{{ $t('common.name') }}</label>
-          <input :value="invite.name" class="input" disabled>
+          <input :value="invite.name" class="input" disabled />
         </div>
         <div>
           <label class="label">{{ $t('common.email') }}</label>
-          <input :value="invite.email" class="input ltr" disabled>
+          <input :value="invite.email" class="input ltr" disabled />
         </div>
         <div>
           <label class="label" for="password">{{ $t('common.password') }}</label>
@@ -73,7 +73,7 @@ async function submit() {
             maxlength="128"
             autocomplete="new-password"
             autofocus
-          >
+          />
           <p class="mt-1 text-xs text-slate-500">{{ $t('setup.passwordHint') }}</p>
         </div>
         <FormAlert :message="error" />

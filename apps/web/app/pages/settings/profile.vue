@@ -34,11 +34,11 @@ async function save() {
   <form class="card max-w-xl space-y-4 p-6" @submit.prevent="save">
     <div>
       <label class="label" for="name">{{ $t('common.name') }}</label>
-      <input id="name" v-model="form.name" class="input" required maxlength="120">
+      <input id="name" v-model="form.name" class="input" required maxlength="120" />
     </div>
     <div>
       <label class="label">{{ $t('common.email') }}</label>
-      <input :value="auth.user?.email" class="input ltr" disabled>
+      <input :value="auth.user?.email" class="input ltr" disabled />
     </div>
     <div>
       <label class="label" for="lang">{{ $t('common.language') }}</label>

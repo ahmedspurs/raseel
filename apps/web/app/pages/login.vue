@@ -27,7 +27,10 @@ async function submit() {
       body: { email: form.email, password: form.password, totp: form.totp || undefined },
     })
     auth.setUser(res.user)
-    const next = typeof route.query.next === 'string' && route.query.next.startsWith('/') ? route.query.next : '/inbox'
+    const next =
+      typeof route.query.next === 'string' && route.query.next.startsWith('/')
+        ? route.query.next
+        : '/inbox'
     await navigateTo(next)
   } catch (err) {
     const code = apiErrorCode(err)
@@ -47,16 +50,33 @@ async function submit() {
   <div class="w-full max-w-sm">
     <div class="mb-6 text-center">
       <h1 class="text-2xl font-bold">{{ $t('login.title') }}</h1>
-      <p class="mt-1.5 text-slate-600 dark:text-slate-400">{{ $t('login.subtitle', { name: businessName }) }}</p>
+      <p class="mt-1.5 text-slate-600 dark:text-slate-400">
+        {{ $t('login.subtitle', { name: businessName }) }}
+      </p>
     </div>
     <form class="card space-y-4 p-6" @submit.prevent="submit">
       <div>
         <label class="label" for="email">{{ $t('common.email') }}</label>
-        <input id="email" v-model="form.email" type="email" class="input ltr" required autocomplete="username" autofocus>
+        <input
+          id="email"
+          v-model="form.email"
+          type="email"
+          class="input ltr"
+          required
+          autocomplete="username"
+          autofocus
+        />
       </div>
       <div>
         <label class="label" for="password">{{ $t('common.password') }}</label>
-        <input id="password" v-model="form.password" type="password" class="input ltr" required autocomplete="current-password">
+        <input
+          id="password"
+          v-model="form.password"
+          type="password"
+          class="input ltr"
+          required
+          autocomplete="current-password"
+        />
       </div>
       <div v-if="needsTotp">
         <label class="label" for="totp">{{ $t('login.totp') }}</label>
@@ -70,7 +90,7 @@ async function submit() {
           autocomplete="one-time-code"
           required
           autofocus
-        >
+        />
         <p class="mt-1 text-xs text-slate-500">{{ $t('errors.totp_required') }}</p>
       </div>
       <FormAlert :message="error" />

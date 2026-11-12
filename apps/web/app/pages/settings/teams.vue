@@ -1,5 +1,7 @@
 <script setup lang="ts">
-definePageMeta({ middleware: [() => (useAuthStore().can('teams:manage') ? undefined : navigateTo('/settings'))] })
+definePageMeta({
+  middleware: [() => (useAuthStore().can('teams:manage') ? undefined : navigateTo('/settings'))],
+})
 
 interface Team {
   id: string
@@ -62,13 +64,15 @@ async function remove(id: string) {
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-lg font-semibold">{{ $t('settings.teams') }}</h2>
-      <button type="button" class="btn-primary" @click="startNew">{{ $t('settings.newTeam') }}</button>
+      <button type="button" class="btn-primary" @click="startNew">
+        {{ $t('settings.newTeam') }}
+      </button>
     </div>
 
     <form v-if="editing" class="card space-y-4 p-6" @submit.prevent="save">
       <div>
         <label class="label" for="tname">{{ $t('settings.teamName') }}</label>
-        <input id="tname" v-model="editing.name" class="input" required maxlength="80" autofocus>
+        <input id="tname" v-model="editing.name" class="input" required maxlength="80" autofocus />
       </div>
       <fieldset>
         <legend class="label">{{ $t('settings.members') }}</legend>
@@ -78,19 +82,29 @@ async function remove(id: string) {
             :key="u.id"
             class="flex items-center gap-2.5 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-slate-800"
           >
-            <input v-model="editing.memberIds" type="checkbox" :value="u.id" class="size-4 accent-brand-700">
+            <input
+              v-model="editing.memberIds"
+              type="checkbox"
+              :value="u.id"
+              class="size-4 accent-brand-700"
+            />
             {{ u.name }}
           </label>
         </div>
       </fieldset>
       <FormAlert :message="error" />
       <div class="flex gap-3">
-        <button type="button" class="btn-secondary" @click="editing = null">{{ $t('common.cancel') }}</button>
+        <button type="button" class="btn-secondary" @click="editing = null">
+          {{ $t('common.cancel') }}
+        </button>
         <button type="submit" class="btn-primary" :disabled="busy">{{ $t('common.save') }}</button>
       </div>
     </form>
 
-    <p v-if="!teams?.length && !editing" class="card p-6 text-center text-sm text-slate-600 dark:text-slate-400">
+    <p
+      v-if="!teams?.length && !editing"
+      class="card p-6 text-center text-sm text-slate-600 dark:text-slate-400"
+    >
       {{ $t('settings.noTeams') }}
     </p>
 
@@ -99,8 +113,12 @@ async function remove(id: string) {
         <div class="flex items-start justify-between gap-3">
           <h3 class="font-semibold">{{ team.name }}</h3>
           <div class="flex gap-3 text-sm">
-            <button type="button" class="font-medium text-brand-700" @click="startEdit(team)">{{ $t('common.edit') }}</button>
-            <button type="button" class="font-medium text-rose-600" @click="remove(team.id)">{{ $t('common.delete') }}</button>
+            <button type="button" class="font-medium text-brand-700" @click="startEdit(team)">
+              {{ $t('common.edit') }}
+            </button>
+            <button type="button" class="font-medium text-rose-600" @click="remove(team.id)">
+              {{ $t('common.delete') }}
+            </button>
           </div>
         </div>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">

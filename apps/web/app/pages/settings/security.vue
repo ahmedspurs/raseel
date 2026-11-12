@@ -35,7 +35,9 @@ const copied = ref(false)
 async function startTwoFactor() {
   tfError.value = null
   try {
-    pending.value = await api<{ secret: string; uri: string }>('/auth/2fa/setup', { method: 'POST' })
+    pending.value = await api<{ secret: string; uri: string }>('/auth/2fa/setup', {
+      method: 'POST',
+    })
   } catch (err) {
     tfError.value = toMessage(err)
   }
@@ -88,11 +90,27 @@ async function copySecret() {
       <h2 class="text-lg font-semibold">{{ $t('settings.changePassword') }}</h2>
       <div>
         <label class="label" for="cur">{{ $t('settings.currentPassword') }}</label>
-        <input id="cur" v-model="pw.currentPassword" type="password" class="input ltr" required autocomplete="current-password">
+        <input
+          id="cur"
+          v-model="pw.currentPassword"
+          type="password"
+          class="input ltr"
+          required
+          autocomplete="current-password"
+        />
       </div>
       <div>
         <label class="label" for="new">{{ $t('settings.newPassword') }}</label>
-        <input id="new" v-model="pw.newPassword" type="password" class="input ltr" required minlength="10" maxlength="128" autocomplete="new-password">
+        <input
+          id="new"
+          v-model="pw.newPassword"
+          type="password"
+          class="input ltr"
+          required
+          minlength="10"
+          maxlength="128"
+          autocomplete="new-password"
+        />
         <p class="mt-1 text-xs text-slate-500">{{ $t('setup.passwordHint') }}</p>
       </div>
       <FormAlert :message="pwMessage?.text" :tone="pwMessage?.tone" />
@@ -104,12 +122,18 @@ async function copySecret() {
         <div>
           <h2 class="text-lg font-semibold">{{ $t('settings.twoFactor') }}</h2>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            {{ auth.user?.twoFactorEnabled ? $t('settings.twoFactorOn') : $t('settings.twoFactorOff') }}
+            {{
+              auth.user?.twoFactorEnabled ? $t('settings.twoFactorOn') : $t('settings.twoFactorOff')
+            }}
           </p>
         </div>
         <span
           class="badge"
-          :class="auth.user?.twoFactorEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'"
+          :class="
+            auth.user?.twoFactorEnabled
+              ? 'bg-emerald-100 text-emerald-800'
+              : 'bg-slate-100 text-slate-600'
+          "
         >
           {{ auth.user?.twoFactorEnabled ? $t('common.active') : $t('common.inactive') }}
         </span>
@@ -120,7 +144,9 @@ async function copySecret() {
           {{ $t('settings.twoFactorEnable') }}
         </button>
         <form v-else class="space-y-4" @submit.prevent="confirmTwoFactor">
-          <p class="text-sm text-slate-600 dark:text-slate-400">{{ $t('settings.twoFactorScan') }}</p>
+          <p class="text-sm text-slate-600 dark:text-slate-400">
+            {{ $t('settings.twoFactorScan') }}
+          </p>
           <div>
             <label class="label">{{ $t('settings.twoFactorKey') }}</label>
             <div class="flex gap-2">
@@ -132,12 +158,25 @@ async function copySecret() {
           </div>
           <div>
             <label class="label" for="code">{{ $t('login.totp') }}</label>
-            <input id="code" v-model="totp" class="input ltr max-w-40 text-center tracking-[0.4em]" inputmode="numeric" pattern="\d{6}" maxlength="6" required autocomplete="one-time-code">
+            <input
+              id="code"
+              v-model="totp"
+              class="input ltr max-w-40 text-center tracking-[0.4em]"
+              inputmode="numeric"
+              pattern="\d{6}"
+              maxlength="6"
+              required
+              autocomplete="one-time-code"
+            />
           </div>
           <FormAlert :message="tfError" />
           <div class="flex gap-3">
-            <button type="button" class="btn-secondary" @click="pending = null">{{ $t('common.cancel') }}</button>
-            <button type="submit" class="btn-primary" :disabled="tfBusy">{{ $t('settings.twoFactorEnable') }}</button>
+            <button type="button" class="btn-secondary" @click="pending = null">
+              {{ $t('common.cancel') }}
+            </button>
+            <button type="submit" class="btn-primary" :disabled="tfBusy">
+              {{ $t('settings.twoFactorEnable') }}
+            </button>
           </div>
         </form>
       </template>
@@ -145,15 +184,33 @@ async function copySecret() {
       <form v-else class="grid gap-4 sm:grid-cols-2" @submit.prevent="disableTwoFactor">
         <div>
           <label class="label" for="dpw">{{ $t('common.password') }}</label>
-          <input id="dpw" v-model="disablePassword" type="password" class="input ltr" required autocomplete="current-password">
+          <input
+            id="dpw"
+            v-model="disablePassword"
+            type="password"
+            class="input ltr"
+            required
+            autocomplete="current-password"
+          />
         </div>
         <div>
           <label class="label" for="dcode">{{ $t('login.totp') }}</label>
-          <input id="dcode" v-model="totp" class="input ltr text-center tracking-[0.4em]" inputmode="numeric" pattern="\d{6}" maxlength="6" required autocomplete="one-time-code">
+          <input
+            id="dcode"
+            v-model="totp"
+            class="input ltr text-center tracking-[0.4em]"
+            inputmode="numeric"
+            pattern="\d{6}"
+            maxlength="6"
+            required
+            autocomplete="one-time-code"
+          />
         </div>
         <FormAlert class="sm:col-span-2" :message="tfError" />
         <div class="sm:col-span-2">
-          <button type="submit" class="btn-danger" :disabled="tfBusy">{{ $t('settings.twoFactorDisable') }}</button>
+          <button type="submit" class="btn-danger" :disabled="tfBusy">
+            {{ $t('settings.twoFactorDisable') }}
+          </button>
         </div>
       </form>
     </section>

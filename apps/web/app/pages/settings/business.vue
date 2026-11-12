@@ -23,7 +23,10 @@ async function save() {
   busy.value = true
   message.value = null
   try {
-    await api('/settings/business', { method: 'PUT', body: { ...form, logoUrl: form.logoUrl || null } })
+    await api('/settings/business', {
+      method: 'PUT',
+      body: { ...form, logoUrl: form.logoUrl || null },
+    })
     await auth.loadSetupStatus(true)
     message.value = { text: t('common.saved'), tone: 'success' }
   } catch (err) {
@@ -38,7 +41,7 @@ async function save() {
   <form class="card max-w-xl space-y-4 p-6" @submit.prevent="save">
     <div>
       <label class="label" for="name">{{ $t('setup.businessName') }}</label>
-      <input id="name" v-model="form.name" class="input" required maxlength="120">
+      <input id="name" v-model="form.name" class="input" required maxlength="120" />
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
@@ -50,7 +53,7 @@ async function save() {
       </div>
       <div>
         <label class="label" for="tz">{{ $t('setup.timeZone') }}</label>
-        <input id="tz" v-model="form.timeZone" class="input ltr" required>
+        <input id="tz" v-model="form.timeZone" class="input ltr" required />
       </div>
     </div>
     <FormAlert :message="message?.text" :tone="message?.tone" />
