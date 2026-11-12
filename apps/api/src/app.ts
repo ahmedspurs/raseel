@@ -11,6 +11,7 @@ import { authPlugin } from './plugins/auth.js'
 import { authRoutes } from './routes/auth.js'
 import { conversationRoutes, mediaRoutes } from './routes/conversations.js'
 import { healthRoutes } from './routes/health.js'
+import { noteRoutes } from './routes/notes.js'
 import { settingsRoutes } from './routes/settings.js'
 import { setupRoutes } from './routes/setup.js'
 import { teamRoutes } from './routes/teams.js'
@@ -83,6 +84,7 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(whatsappRoutes, { prefix: '/api/whatsapp' })
   await app.register(conversationRoutes, { prefix: '/api/conversations' })
   await app.register(mediaRoutes, { prefix: '/api/media' })
+  await app.register(noteRoutes, { prefix: '/api' })
   await app.register(webhookRoutes, { prefix: '/webhooks' })
 
   return app
