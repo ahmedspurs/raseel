@@ -12,6 +12,12 @@ const tabs = computed(() =>
       { to: '/settings/security', label: 'settings.security' },
       { to: '/settings/business', label: 'settings.business', permission: 'settings:manage' },
       { to: '/settings/whatsapp', label: 'settings.whatsapp', permission: 'whatsapp:manage' },
+      { to: '/settings/inbox', label: 'settings.inbox', permission: 'settings:manage' },
+      {
+        to: '/settings/quick-replies',
+        label: 'settings.quickReplies',
+        permission: 'templates:manage',
+      },
       { to: '/settings/users', label: 'settings.users', permission: 'users:manage' },
       { to: '/settings/teams', label: 'settings.teams', permission: 'teams:manage' },
     ] as { to: string; label: string; permission?: Permission }[]

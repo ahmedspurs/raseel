@@ -52,7 +52,12 @@
     "not_connected": "WhatsApp is not connected.",
     "file_too_large": "This file is too large for WhatsApp.",
     "access_token_required": "Enter the access token.",
-    "app_secret_required": "Enter the app secret."
+    "app_secret_required": "Enter the app secret.",
+    "invalid_assignee": "This person cannot be assigned conversations.",
+    "invalid_team": "This team no longer exists.",
+    "shortcut_taken": "This shortcut is already used.",
+    "audio_format_unsupported": "This audio could not be converted for WhatsApp.",
+    "not_found": "Not found."
   },
   "setup": {
     "title": "Set up your workspace",
@@ -91,12 +96,6 @@
     "selectConversation": "Select a conversation to start.",
     "notConnected": "WhatsApp is not connected. Messages cannot be sent or received.",
     "connectNow": "Connect now",
-    "filters": {
-      "ALL": "All",
-      "OPEN": "Open",
-      "PENDING": "Pending",
-      "CLOSED": "Closed"
-    },
     "loadOlder": "Load older messages",
     "composerPlaceholder": "Write a reply… (Enter to send, Shift+Enter for a new line)",
     "send": "Send",
@@ -126,7 +125,60 @@
     },
     "fileTooLarge": "This file is too large for WhatsApp.",
     "windowClosedError": "The 24-hour window is closed. Send a template instead.",
-    "windowClosedShort": "Reply window closed"
+    "windowClosedShort": "Reply window closed",
+    "views": {
+      "mine": "Mine",
+      "unassigned": "Unassigned",
+      "team": "My teams",
+      "all": "All",
+      "closed": "Closed"
+    },
+    "filters": {
+      "title": "Filters",
+      "agent": "Agent",
+      "team": "Team",
+      "status": "Status",
+      "any": "Any",
+      "from": "From",
+      "to": "To",
+      "clear": "Clear filters",
+      "OPEN": "Open",
+      "PENDING": "Pending"
+    },
+    "assignee": "Assignee",
+    "unassigned": "Unassigned",
+    "team": "Team",
+    "noTeam": "No team",
+    "assignToMe": "Assign to me",
+    "statusLabel": {
+      "OPEN": "Open",
+      "PENDING": "Pending",
+      "CLOSED": "Closed"
+    },
+    "markPending": "Mark pending",
+    "close": "Close",
+    "reopen": "Reopen",
+    "viewing": "{names} also viewing",
+    "typing": "{names} typing…",
+    "collision": "{names} is replying to this conversation. Coordinate before you reply.",
+    "reply": "Reply",
+    "note": "Internal note",
+    "notePlaceholder": "Write an internal note. Type {'@'} to mention a colleague. Customers never see notes.",
+    "noteBadge": "Internal note",
+    "addNote": "Add note",
+    "quickReplies": "Quick replies",
+    "noQuickReplies": "No quick reply matches \"{q}\".",
+    "record": "Record voice note",
+    "stopRecording": "Stop and send",
+    "cancelRecording": "Cancel",
+    "recording": "Recording {time}",
+    "micDenied": "Microphone access was denied.",
+    "audioUnsupported": "This browser cannot record audio.",
+    "reconnecting": "Reconnecting…",
+    "mentions": "Mentions",
+    "noMentions": "No mentions yet.",
+    "markAllRead": "Mark all as read",
+    "mentionedYou": "{name} mentioned you"
   },
   "settings": {
     "title": "Settings",
@@ -157,7 +209,9 @@
     "teamName": "Team name",
     "members": "Members",
     "noTeams": "No teams yet. Teams let you route conversations to a group of agents.",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "quickReplies": "Quick replies",
+    "inbox": "Inbox"
   },
   "whatsapp": {
     "title": "WhatsApp",
@@ -187,5 +241,24 @@
     "quality": "Quality rating",
     "verificationFailed": "Meta did not accept these credentials: {reason}",
     "billingNote": "Meta bills your business directly for WhatsApp conversations."
+  },
+  "quickReplies": {
+    "title": "Quick replies",
+    "intro": "Saved answers agents insert by typing / in the reply box.",
+    "new": "New quick reply",
+    "shortcut": "Shortcut",
+    "shortcutHint": "Agents type /{shortcut}",
+    "titleLabel": "Title",
+    "body": "Message",
+    "language": "Language",
+    "anyLanguage": "Any",
+    "empty": "No quick replies yet."
+  },
+  "inboxSettings": {
+    "title": "Inbox",
+    "autoAssign": "Automatic assignment",
+    "autoAssignHelp": "Assign each new or unassigned conversation to the next agent in turn (round robin).",
+    "participants": "Who receives conversations",
+    "participantsHelp": "Leave everyone unchecked to include all active agents and admins."
   }
 }

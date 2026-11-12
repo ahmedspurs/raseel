@@ -19,13 +19,21 @@ describe('extractMentions', () => {
 
 describe('quickReplySchema', () => {
   it('accepts Arabic shortcuts and lowercases Latin ones', () => {
-    expect(quickReplySchema.parse({ shortcut: 'مواعيد', title: 'Hours', body: '9-5' }).shortcut).toBe('مواعيد')
-    expect(quickReplySchema.parse({ shortcut: 'Hours', title: 'Hours', body: '9-5' }).shortcut).toBe('hours')
+    expect(
+      quickReplySchema.parse({ shortcut: 'مواعيد', title: 'Hours', body: '9-5' }).shortcut,
+    ).toBe('مواعيد')
+    expect(
+      quickReplySchema.parse({ shortcut: 'Hours', title: 'Hours', body: '9-5' }).shortcut,
+    ).toBe('hours')
   })
 
   it('rejects spaces and slashes', () => {
-    expect(quickReplySchema.safeParse({ shortcut: 'a b', title: 't', body: 'b' }).success).toBe(false)
-    expect(quickReplySchema.safeParse({ shortcut: '/hours', title: 't', body: 'b' }).success).toBe(false)
+    expect(quickReplySchema.safeParse({ shortcut: 'a b', title: 't', body: 'b' }).success).toBe(
+      false,
+    )
+    expect(quickReplySchema.safeParse({ shortcut: '/hours', title: 't', body: 'b' }).success).toBe(
+      false,
+    )
   })
 })
 
