@@ -47,7 +47,12 @@
     "name_taken": "هذا الاسم مستخدم.",
     "validation_error": "تحقّق من الحقول المحددة.",
     "rate_limited": "محاولات كثيرة. انتظر بضع دقائق.",
-    "forbidden": "ليست لديك صلاحية لهذا الإجراء."
+    "forbidden": "ليست لديك صلاحية لهذا الإجراء.",
+    "window_closed": "انتهت نافذة الـ 24 ساعة. أرسل قالباً بدلاً من ذلك.",
+    "not_connected": "واتساب غير مربوط.",
+    "file_too_large": "الملف أكبر من المسموح في واتساب.",
+    "access_token_required": "أدخل رمز الوصول.",
+    "app_secret_required": "أدخل المفتاح السري للتطبيق."
   },
   "setup": {
     "title": "إعداد مساحة العمل",
@@ -81,7 +86,47 @@
   },
   "inbox": {
     "emptyTitle": "صندوقك جاهز",
-    "emptyBody": "اربط رقم واتساب من الإعدادات لتبدأ باستقبال الرسائل."
+    "emptyBody": "اربط رقم واتساب من الإعدادات لتبدأ باستقبال الرسائل.",
+    "noConversations": "لا توجد محادثات بعد. رسائل واتساب الجديدة ستظهر هنا.",
+    "selectConversation": "اختر محادثة للبدء.",
+    "notConnected": "واتساب غير مربوط. لا يمكن إرسال أو استقبال الرسائل.",
+    "connectNow": "اربط الآن",
+    "filters": {
+      "ALL": "الكل",
+      "OPEN": "مفتوحة",
+      "PENDING": "معلّقة",
+      "CLOSED": "مغلقة"
+    },
+    "loadOlder": "تحميل الرسائل الأقدم",
+    "composerPlaceholder": "اكتب ردك… (Enter للإرسال، Shift+Enter لسطر جديد)",
+    "send": "إرسال",
+    "attach": "إرفاق ملف",
+    "caption": "أضف وصفاً (اختياري)",
+    "removeFile": "إزالة الملف",
+    "windowOpen": "نافذة الرد تُغلق خلال {time}",
+    "windowClosed": "انتهت نافذة الـ 24 ساعة. يمكن إرسال القوالب المعتمدة فقط.",
+    "windowNever": "هذا العميل لم يراسلك بعد. يمكن إرسال القوالب المعتمدة فقط.",
+    "you": "أنت",
+    "retry": "إعادة المحاولة",
+    "failed": "لم تُرسل",
+    "mediaPending": "جارٍ التنزيل…",
+    "download": "تنزيل",
+    "openMap": "فتح في الخرائط",
+    "reacted": "تفاعل بـ {emoji}",
+    "reactionRemoved": "أزال تفاعله",
+    "unsupported": "نوع الرسالة هذا غير مدعوم بعد.",
+    "replyTo": "رداً على",
+    "back": "رجوع",
+    "status": {
+      "QUEUED": "جارٍ الإرسال",
+      "SENT": "أُرسلت",
+      "DELIVERED": "وصلت",
+      "READ": "قُرئت",
+      "FAILED": "فشلت"
+    },
+    "fileTooLarge": "الملف أكبر من المسموح في واتساب.",
+    "windowClosedError": "انتهت نافذة الـ 24 ساعة. أرسل قالباً بدلاً من ذلك.",
+    "windowClosedShort": "نافذة الرد مغلقة"
   },
   "settings": {
     "title": "الإعدادات",
@@ -111,6 +156,36 @@
     "newTeam": "فريق جديد",
     "teamName": "اسم الفريق",
     "members": "الأعضاء",
-    "noTeams": "لا توجد فرق بعد. الفرق تتيح توجيه المحادثات لمجموعة موظفين."
+    "noTeams": "لا توجد فرق بعد. الفرق تتيح توجيه المحادثات لمجموعة موظفين.",
+    "whatsapp": "واتساب"
+  },
+  "whatsapp": {
+    "title": "واتساب",
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "connectTitle": "اربط رقم واتساب للأعمال",
+    "connectIntro": "رسيل يستخدم WhatsApp Cloud API الرسمي. انسخ هذه القيم من تطبيقك في Meta for Developers.",
+    "phoneNumberId": "معرّف رقم الهاتف (Phone Number ID)",
+    "wabaId": "معرّف حساب واتساب للأعمال (WABA ID)",
+    "accessToken": "رمز الوصول الدائم",
+    "accessTokenHint": "رمز مستخدم نظام (System User) بصلاحيات whatsapp_business_messaging و whatsapp_business_management.",
+    "accessTokenKeep": "اتركه فارغاً للإبقاء على الرمز المحفوظ ({masked}).",
+    "appSecret": "المفتاح السري للتطبيق (App secret)",
+    "appSecretHint": "من إعدادات التطبيق ← أساسي. يُستخدم للتأكد أن الإشعارات قادمة فعلاً من ميتا.",
+    "appSecretKeep": "اتركه فارغاً للإبقاء على المفتاح المحفوظ.",
+    "connect": "تحقّق واربط",
+    "update": "تحقّق واحفظ",
+    "disconnect": "فصل الربط",
+    "disconnectConfirm": "فصل واتساب؟ ستتوقف الرسائل حتى تعيد الربط.",
+    "webhookTitle": "الويب هوك (Webhook)",
+    "webhookIntro": "في تطبيق ميتا افتح WhatsApp ← Configuration، الصق هذه القيم، واشترك في حقل \"messages\".",
+    "callbackUrl": "رابط الاستدعاء (Callback URL)",
+    "verifyToken": "رمز التحقق (Verify token)",
+    "webhookWaiting": "بانتظار أول إشعار من ميتا…",
+    "webhookReceived": "الإشعارات تصل بنجاح. أول استلام: {date}",
+    "verifiedName": "اسم النشاط",
+    "quality": "تقييم الجودة",
+    "verificationFailed": "ميتا لم تقبل هذه البيانات: {reason}",
+    "billingNote": "ميتا تحاسب نشاطك التجاري مباشرة على محادثات واتساب."
   }
 }

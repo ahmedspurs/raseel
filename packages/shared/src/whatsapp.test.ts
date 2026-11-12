@@ -42,8 +42,8 @@ describe('whatsappSettingsSchema', () => {
         appSecret: 'a'.repeat(32),
       }).success,
     ).toBe(true)
-    expect(
-      whatsappSettingsSchema.safeParse({ phoneNumberId: 'abc', wabaId: '1' }).success,
-    ).toBe(false)
+    expect(whatsappSettingsSchema.safeParse({ phoneNumberId: 'abc', wabaId: '1' }).success).toBe(
+      false,
+    )
   })
 })

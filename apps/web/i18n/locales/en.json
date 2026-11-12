@@ -47,7 +47,12 @@
     "name_taken": "This name is already used.",
     "validation_error": "Please check the highlighted fields.",
     "rate_limited": "Too many attempts. Please wait a few minutes.",
-    "forbidden": "You do not have permission to do this."
+    "forbidden": "You do not have permission to do this.",
+    "window_closed": "The 24-hour window is closed. Send a template instead.",
+    "not_connected": "WhatsApp is not connected.",
+    "file_too_large": "This file is too large for WhatsApp.",
+    "access_token_required": "Enter the access token.",
+    "app_secret_required": "Enter the app secret."
   },
   "setup": {
     "title": "Set up your workspace",
@@ -81,7 +86,47 @@
   },
   "inbox": {
     "emptyTitle": "Your inbox is ready",
-    "emptyBody": "Connect your WhatsApp number in Settings to start receiving messages."
+    "emptyBody": "Connect your WhatsApp number in Settings to start receiving messages.",
+    "noConversations": "No conversations yet. New WhatsApp messages will appear here.",
+    "selectConversation": "Select a conversation to start.",
+    "notConnected": "WhatsApp is not connected. Messages cannot be sent or received.",
+    "connectNow": "Connect now",
+    "filters": {
+      "ALL": "All",
+      "OPEN": "Open",
+      "PENDING": "Pending",
+      "CLOSED": "Closed"
+    },
+    "loadOlder": "Load older messages",
+    "composerPlaceholder": "Write a reply… (Enter to send, Shift+Enter for a new line)",
+    "send": "Send",
+    "attach": "Attach file",
+    "caption": "Add a caption (optional)",
+    "removeFile": "Remove file",
+    "windowOpen": "Reply window closes in {time}",
+    "windowClosed": "The 24-hour reply window is closed. Only approved templates can be sent.",
+    "windowNever": "This customer has not written yet. Only approved templates can be sent.",
+    "you": "You",
+    "retry": "Retry",
+    "failed": "Not delivered",
+    "mediaPending": "Downloading…",
+    "download": "Download",
+    "openMap": "Open in maps",
+    "reacted": "reacted {emoji}",
+    "reactionRemoved": "removed a reaction",
+    "unsupported": "This message type is not supported yet.",
+    "replyTo": "Replying to",
+    "back": "Back",
+    "status": {
+      "QUEUED": "Sending",
+      "SENT": "Sent",
+      "DELIVERED": "Delivered",
+      "READ": "Read",
+      "FAILED": "Failed"
+    },
+    "fileTooLarge": "This file is too large for WhatsApp.",
+    "windowClosedError": "The 24-hour window is closed. Send a template instead.",
+    "windowClosedShort": "Reply window closed"
   },
   "settings": {
     "title": "Settings",
@@ -111,6 +156,36 @@
     "newTeam": "New team",
     "teamName": "Team name",
     "members": "Members",
-    "noTeams": "No teams yet. Teams let you route conversations to a group of agents."
+    "noTeams": "No teams yet. Teams let you route conversations to a group of agents.",
+    "whatsapp": "WhatsApp"
+  },
+  "whatsapp": {
+    "title": "WhatsApp",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "connectTitle": "Connect your WhatsApp Business number",
+    "connectIntro": "Raseel uses the official WhatsApp Cloud API. Copy these values from your app in Meta for Developers.",
+    "phoneNumberId": "Phone Number ID",
+    "wabaId": "WhatsApp Business Account ID",
+    "accessToken": "Permanent access token",
+    "accessTokenHint": "A System User token with whatsapp_business_messaging and whatsapp_business_management permissions.",
+    "accessTokenKeep": "Leave empty to keep the saved token ({masked}).",
+    "appSecret": "App secret",
+    "appSecretHint": "From App settings → Basic. Used to verify that webhooks really come from Meta.",
+    "appSecretKeep": "Leave empty to keep the saved app secret.",
+    "connect": "Verify and connect",
+    "update": "Verify and save",
+    "disconnect": "Disconnect",
+    "disconnectConfirm": "Disconnect WhatsApp? Messages will stop arriving until you connect again.",
+    "webhookTitle": "Webhook",
+    "webhookIntro": "In your Meta app, open WhatsApp → Configuration, paste these values, and subscribe to the \"messages\" field.",
+    "callbackUrl": "Callback URL",
+    "verifyToken": "Verify token",
+    "webhookWaiting": "Waiting for the first webhook from Meta…",
+    "webhookReceived": "Webhooks are arriving. First received: {date}",
+    "verifiedName": "Business name",
+    "quality": "Quality rating",
+    "verificationFailed": "Meta did not accept these credentials: {reason}",
+    "billingNote": "Meta bills your business directly for WhatsApp conversations."
   }
 }
