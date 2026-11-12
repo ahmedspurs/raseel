@@ -66,7 +66,16 @@
     "not_approved": "This template is not approved yet.",
     "missing_variables": "Fill in every variable.",
     "header_media_required": "This template needs a header media URL.",
-    "meta_error": "Meta rejected the request."
+    "meta_error": "Meta rejected the request.",
+    "empty_audience": "No opted-in contacts match this audience.",
+    "template_not_approved": "Choose an approved template.",
+    "not_editable": "This broadcast can no longer be changed.",
+    "stage_has_deals": "Move the deals out of a stage before removing it.",
+    "phone_column_missing": "The file needs a phone column.",
+    "empty_file": "The file has no rows.",
+    "too_many_rows": "The file has too many rows.",
+    "invalid_phone": "Invalid phone number",
+    "invalid_reference": "The selected item no longer exists."
   },
   "setup": {
     "title": "Set up your workspace",
@@ -96,7 +105,10 @@
     "inbox": "Inbox",
     "contacts": "Contacts",
     "settings": "Settings",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "deals": "Deals",
+    "tasks": "Tasks",
+    "broadcasts": "Broadcasts"
   },
   "inbox": {
     "emptyTitle": "Your inbox is ready",
@@ -226,7 +238,10 @@
     "inbox": "Inbox",
     "templates": "Templates",
     "tags": "Tags",
-    "customFields": "Custom fields"
+    "customFields": "Custom fields",
+    "automation": "Automation",
+    "segments": "Segments",
+    "pipeline": "Deal stages"
   },
   "whatsapp": {
     "title": "WhatsApp",
@@ -393,5 +408,139 @@
     "messages": "Messages",
     "none": "Nothing found for \"{q}\".",
     "minChars": "Type at least 2 characters."
+  },
+  "deals": {
+    "title": "Deals",
+    "new": "New deal",
+    "titleLabel": "Deal title",
+    "contact": "Contact",
+    "searchContact": "Search contacts…",
+    "value": "Value (SAR)",
+    "owner": "Owner",
+    "expectedClose": "Expected close",
+    "stage": "Stage",
+    "total": "{count} · {value}",
+    "empty": "Drop deals here",
+    "openTasks": "{n} open tasks",
+    "delete": "Delete deal",
+    "won": "Won",
+    "lost": "Lost"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "new": "New task",
+    "titleLabel": "Task",
+    "due": "Due",
+    "assignee": "Assigned to",
+    "mine": "My tasks",
+    "all": "All tasks",
+    "showDone": "Show completed",
+    "empty": "No tasks.",
+    "overdue": "Overdue",
+    "dueToast": "Task due: {title}",
+    "add": "Add task",
+    "related": "Related to"
+  },
+  "broadcasts": {
+    "title": "Broadcasts",
+    "new": "New broadcast",
+    "empty": "No broadcasts yet.",
+    "name": "Campaign name",
+    "template": "Approved template",
+    "segment": "Audience",
+    "allOptedIn": "All opted-in contacts",
+    "audience": "{n} opted-in contacts will receive it",
+    "optInNote": "Only contacts who agreed to marketing messages receive broadcasts. Replies of STOP or إيقاف opt them out automatically.",
+    "when": "When",
+    "now": "Send now",
+    "later": "Schedule",
+    "scheduledAt": "Send at",
+    "create": "Create broadcast",
+    "cancel": "Cancel broadcast",
+    "report": "Report",
+    "recipients": "Recipients",
+    "status": {
+      "DRAFT": "Draft",
+      "SCHEDULED": "Scheduled",
+      "SENDING": "Sending",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "stats": {
+      "total": "Recipients",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "replied": "Replied",
+      "failed": "Failed",
+      "skipped": "Skipped",
+      "pending": "Pending"
+    },
+    "recipientStatus": {
+      "PENDING": "Pending",
+      "QUEUED": "Sent to WhatsApp",
+      "SKIPPED": "Skipped",
+      "FAILED": "Failed"
+    },
+    "tierNote": "WhatsApp limits how many new customers a number can message per day (messaging tier). Large campaigns may be paused by Meta if they exceed it."
+  },
+  "segments": {
+    "title": "Segments",
+    "new": "New segment",
+    "name": "Segment name",
+    "tags": "Has tags",
+    "tagMatch": "Match",
+    "any": "any of",
+    "all": "all of",
+    "field": "Custom field equals",
+    "addCondition": "Add condition",
+    "language": "Language",
+    "anyLanguage": "Any",
+    "preview": "{audience} opted in of {matching} matching contacts",
+    "empty": "No segments yet."
+  },
+  "automation": {
+    "title": "Automation",
+    "workingHours": "Working hours",
+    "workingHoursHelp": "Outside these hours, customers get the away message once every 12 hours.",
+    "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    "closed": "Closed",
+    "awayMessage": "Away message",
+    "welcome": "Welcome message",
+    "welcomeHelp": "Sent once to customers who write for the first time.",
+    "welcomeButtons": "Reply buttons (up to 3)",
+    "rules": "Keyword rules",
+    "rulesHelp": "The first active rule whose keyword appears in a customer message runs. Spelling variants are ignored; add plural forms as separate keywords.",
+    "newRule": "New rule",
+    "ruleName": "Rule name",
+    "keywords": "Keywords (comma separated)",
+    "match": "Match",
+    "contains": "Message contains",
+    "exact": "Message is exactly",
+    "thenTag": "Add tag",
+    "thenAssign": "Assign to",
+    "thenTeam": "Assign to team",
+    "thenReply": "Reply with",
+    "none": "—",
+    "active": "Active",
+    "enabled": "Enabled",
+    "automated": "Automated"
+  },
+  "pipeline": {
+    "title": "Deal stages",
+    "addStage": "Add stage",
+    "kinds": {
+      "OPEN": "Open",
+      "WON": "Won",
+      "LOST": "Lost"
+    }
+  },
+  "csv": {
+    "import": "Import CSV",
+    "export": "Export CSV",
+    "importHelp": "Columns: phone (required), name, email, company, city, tags (separated by {'|'}), opt_in (yes/نعم), language, and any custom field key. Arabic headers work too.",
+    "importResult": "{created} created, {updated} updated, {optedIn} opted in",
+    "errorsTitle": "Rows skipped",
+    "row": "Row {row}: {error}"
   }
 }

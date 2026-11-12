@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ContactInfo, CustomFieldDef, TagInfo } from '~/types/crm'
 import type { ConversationSummary } from '~/types/inbox'
+import type { DealInfo, PipelineInfo } from '~/types/sales'
 
 const route = useRoute()
 const api = useApi()
@@ -118,6 +119,20 @@ async function remove() {
 }
 
 const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }))
+
+// ── Deals (FR-33) ──
+const money = useMoney()
+const deals = ref<DealInfo[]>([])
+const stages = ref<{ id: string; name: string }[]>([])
+onMounted(async () => {
+  const [d, p] = await Promise.all([
+    api<{ deals: DealInfo[] }>('/deals', { query: { contactId: id.value } }),
+    api<{ pipelines: PipelineInfo[] }>('/pipelines'),
+  ])
+  deals.value = d.deals
+  stages.value = p.pipelines.flatMap((x) => x.stages)
+})
+const stageName = (sid: string) => stages.value.find((s) => s.id === sid)?.name ?? ''
 </script>
 
 <template>
@@ -316,6 +331,30 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
                 </NuxtLink>
               </li>
             </ul>
+          </section>
+
+          <section class="card p-5">
+            <h2 class="mb-3 font-semibold">{{ $t('deals.title') }}</h2>
+            <ul class="space-y-2">
+              <li
+                v-for="d in deals"
+                :key="d.id"
+                class="rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800"
+              >
+                <p class="font-medium" dir="auto">{{ d.title }}</p>
+                <p class="text-xs text-slate-500">
+                  {{ money(d.valueSar) }} · {{ stageName(d.stageId) }}
+                </p>
+              </li>
+            </ul>
+            <NuxtLink to="/deals" class="mt-2 inline-block text-sm font-medium text-brand-700">
+              {{ $t('deals.title') }} ›
+            </NuxtLink>
+          </section>
+
+          <section class="card p-5">
+            <h2 class="mb-3 font-semibold">{{ $t('tasks.title') }}</h2>
+            <TaskList :contact-id="data.contact.id" compact />
           </section>
 
           <section v-if="auth.can('data:export')" class="card space-y-3 p-5">

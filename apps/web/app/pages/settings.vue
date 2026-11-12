@@ -20,6 +20,20 @@ const tabs = computed(() =>
       },
       { to: '/settings/users', label: 'settings.users', permission: 'users:manage' },
       { to: '/settings/teams', label: 'settings.teams', permission: 'teams:manage' },
+      { to: '/settings/templates', label: 'settings.templates', permission: 'templates:manage' },
+      { to: '/settings/tags', label: 'settings.tags', permission: 'tags:manage' },
+      {
+        to: '/settings/custom-fields',
+        label: 'settings.customFields',
+        permission: 'settings:manage',
+      },
+      {
+        to: '/settings/automation',
+        label: 'settings.automation',
+        permission: 'automations:manage',
+      },
+      { to: '/settings/segments', label: 'settings.segments', permission: 'broadcasts:manage' },
+      { to: '/settings/pipeline', label: 'settings.pipeline', permission: 'settings:manage' },
     ] as { to: string; label: string; permission?: Permission }[]
   ).filter((tab) => !tab.permission || auth.can(tab.permission)),
 )

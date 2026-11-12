@@ -1,6 +1,15 @@
 <script setup lang="ts">
 const auth = useAuthStore()
 const route = useRoute()
+const realtime = useRealtime()
+const { t } = useI18n()
+const toast = ref<{ text: string; to: string } | null>(null)
+let toastTimer: ReturnType<typeof setTimeout> | undefined
+realtime.on<{ taskId: string; title: string }>('task', (e) => {
+  toast.value = { text: t('tasks.dueToast', { title: e.title }), to: '/tasks' }
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => (toast.value = null), 8000)
+})
 
 const nav = computed(() => [
   { to: '/inbox', label: 'nav.inbox', icon: 'M4 5h16v10h-5l-3 3-3-3H4z' },
@@ -8,6 +17,21 @@ const nav = computed(() => [
     to: '/contacts',
     label: 'nav.contacts',
     icon: 'M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 9v-1a4 4 0 0 0-3-3.9M16 2.1a4 4 0 0 1 0 7.8',
+  },
+  {
+    to: '/deals',
+    label: 'nav.deals',
+    icon: 'M4 5h4v14H4zM10 5h4v9h-4zM16 5h4v6h-4z',
+  },
+  {
+    to: '/tasks',
+    label: 'nav.tasks',
+    icon: 'M9 11l2 2 4-4M5 4h14v16H5z',
+  },
+  {
+    to: '/broadcasts',
+    label: 'nav.broadcasts',
+    icon: 'M3 11v2l13 5V6L3 11Zm13-1h2a3 3 0 0 1 0 6h-2M7 14l1 5h3l-1-4',
   },
   {
     to: '/settings',
@@ -97,5 +121,14 @@ async function logout() {
     <main class="min-w-0 flex-1">
       <slot />
     </main>
+    <NuxtLink
+      v-if="toast"
+      :to="toast.to"
+      role="status"
+      class="fixed bottom-24 end-4 z-50 max-w-sm rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-lg md:bottom-6"
+      @click="toast = null"
+    >
+      ⏰ {{ toast.text }}
+    </NuxtLink>
   </div>
 </template>

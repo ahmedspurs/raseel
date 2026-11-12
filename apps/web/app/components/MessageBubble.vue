@@ -6,6 +6,10 @@ const emit = defineEmits<{ retry: [id: string] }>()
 const { time } = useFormat()
 
 const outbound = computed(() => props.message.direction === 'OUTBOUND')
+/** Reply buttons attached to an automated or interactive message. */
+const outboundButtons = computed(
+  () => (props.message.payload as { buttons?: string[] } | null)?.buttons ?? [],
+)
 const payload = computed(() => (props.message.payload ?? {}) as Record<string, unknown>)
 
 const location = computed(() => {
@@ -60,6 +64,12 @@ const showBody = computed(
     >
       <p v-if="outbound && message.sentBy" class="mb-0.5 text-xs font-medium text-brand-100">
         {{ message.sentBy.name }}
+      </p>
+      <p
+        v-else-if="outbound && message.automated"
+        class="mb-0.5 text-xs font-medium text-brand-100"
+      >
+        ⚙️ {{ $t('automation.automated') }}
       </p>
 
       <div
@@ -156,10 +166,22 @@ const showBody = computed(
         :class="{ 'mt-1.5': message.media }"
         dir="auto"
       >
-        <span v-if="message.type === 'INTERACTIVE' || message.type === 'BUTTON'" aria-hidden="true"
+        <span
+          v-if="!outbound && (message.type === 'INTERACTIVE' || message.type === 'BUTTON')"
+          aria-hidden="true"
           >↩︎ </span
         >{{ message.body }}
       </p>
+
+      <div v-if="outbound && outboundButtons.length" class="mt-2 flex flex-wrap gap-1">
+        <span
+          v-for="b in outboundButtons"
+          :key="b"
+          class="rounded-lg bg-white/15 px-2.5 py-1 text-xs"
+        >
+          {{ b }}
+        </span>
+      </div>
 
       <div
         class="mt-1 flex items-center justify-end gap-1 text-[11px]"

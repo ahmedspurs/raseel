@@ -66,6 +66,7 @@ export function messageDto(
         : null,
     replyTo: replyTo ?? null,
     sentBy: m.sentBy ? { id: m.sentBy.id, name: m.sentBy.name } : null,
+    automated: m.automated,
     createdAt: m.createdAt,
   }
 }

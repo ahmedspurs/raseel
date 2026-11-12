@@ -44,6 +44,7 @@ export interface InboxMessage {
   } | null
   replyTo: { id: string; body: string | null; type: string } | null
   sentBy: { id: string; name: string } | null
+  automated?: boolean
   createdAt: string
 }
 

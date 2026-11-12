@@ -51,6 +51,30 @@ watch(q, () => {
 watch([tagId, optIn], () => void load())
 onMounted(() => void load())
 
+// ── CSV import (FR-32) ──
+const importing = ref(false)
+const importResult = ref<{
+  created: number
+  updated: number
+  optedIn: number
+  errors: { row: number; error: string }[]
+} | null>(null)
+const importError = ref<string | null>(null)
+async function importCsv(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  importResult.value = null
+  importError.value = null
+  const form = new FormData()
+  form.append('file', file, file.name)
+  try {
+    importResult.value = await api('/contacts/import', { method: 'POST', body: form })
+    await load()
+  } catch (err) {
+    importError.value = toMessage(err)
+  }
+}
+
 // ── Add contact ──
 const adding = ref(false)
 const newContact = reactive({ waId: '', name: '' })
@@ -80,14 +104,53 @@ async function addContact() {
         <h1 class="text-2xl font-bold">{{ $t('contacts.title') }}</h1>
         <p class="text-sm text-slate-500">{{ $t('contacts.total', { n: total }) }}</p>
       </div>
-      <button
-        v-if="auth.can('contacts:edit')"
-        type="button"
-        class="btn-primary"
-        @click="adding = !adding"
-      >
-        {{ $t('contacts.add') }}
-      </button>
+      <div class="flex flex-wrap gap-2">
+        <a
+          v-if="auth.can('data:export')"
+          href="/api/contacts/export.csv"
+          class="btn-secondary"
+          download
+        >
+          {{ $t('csv.export') }}
+        </a>
+        <button
+          v-if="auth.can('settings:manage')"
+          type="button"
+          class="btn-secondary"
+          @click="importing = !importing"
+        >
+          {{ $t('csv.import') }}
+        </button>
+        <button
+          v-if="auth.can('contacts:edit')"
+          type="button"
+          class="btn-primary"
+          @click="adding = !adding"
+        >
+          {{ $t('contacts.add') }}
+        </button>
+      </div>
+    </div>
+
+    <div v-if="importing" class="card mb-5 space-y-3 p-5">
+      <p class="text-sm text-slate-600 dark:text-slate-400">{{ $t('csv.importHelp') }}</p>
+      <input type="file" accept=".csv,text/csv" class="text-sm" @change="importCsv" />
+      <FormAlert
+        v-if="importResult"
+        tone="success"
+        :message="$t('csv.importResult', importResult)"
+      />
+      <FormAlert :message="importError" />
+      <details v-if="importResult?.errors.length" class="text-sm">
+        <summary class="cursor-pointer font-medium">
+          {{ $t('csv.errorsTitle') }} ({{ importResult.errors.length }})
+        </summary>
+        <ul class="mt-2 space-y-1 text-xs text-rose-700">
+          <li v-for="e in importResult.errors" :key="e.row">
+            {{ $t('csv.row', { row: e.row, error: $t(`errors.${e.error}`) }) }}
+          </li>
+        </ul>
+      </details>
     </div>
 
     <form
