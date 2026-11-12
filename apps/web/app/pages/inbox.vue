@@ -15,6 +15,12 @@ const { shortDate } = useFormat()
 const activeId = computed(() => (route.params.id as string | undefined) ?? null)
 const views: InboxView[] = ['mine', 'unassigned', 'team', 'all', 'closed']
 const showFilters = ref(false)
+const tags = ref<{ id: string; name: string }[]>([])
+watch(showFilters, async (open) => {
+  if (open && !tags.value.length) {
+    tags.value = (await useApi()<{ tags: { id: string; name: string }[] }>('/tags')).tags
+  }
+})
 
 realtime.on<{ conversation: ConversationSummary }>('conversation', ({ conversation }) =>
   inbox.applyConversation(conversation),
@@ -78,6 +84,8 @@ onBeforeUnmount(() => clearInterval(fallback))
           </div>
         </div>
 
+        <GlobalSearch />
+
         <nav class="-mx-1 flex gap-1 overflow-x-auto px-1" :aria-label="$t('nav.inbox')">
           <button
             v-for="v in views"
@@ -127,6 +135,13 @@ onBeforeUnmount(() => clearInterval(fallback))
               <option v-for="tm in directory.teams" :key="tm.id" :value="tm.id">
                 {{ tm.name }}
               </option>
+            </select>
+          </label>
+          <label class="col-span-2">
+            <span class="label text-xs">{{ $t('inbox.filters.tag') }}</span>
+            <select v-model="inbox.filters.tagId" class="input py-1.5">
+              <option value="">{{ $t('inbox.filters.any') }}</option>
+              <option v-for="tg in tags" :key="tg.id" :value="tg.id">{{ tg.name }}</option>
             </select>
           </label>
           <label>

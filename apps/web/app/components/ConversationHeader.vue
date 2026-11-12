@@ -85,6 +85,12 @@ function onTeam(e: Event) {
         </p>
         <p class="ltr text-xs text-slate-500">+{{ conversation.contact.waId }}</p>
       </div>
+      <NuxtLink
+        :to="`/contacts/${conversation.contact.id}`"
+        class="rounded-lg px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
+      >
+        {{ $t('inbox.viewContact') }}
+      </NuxtLink>
       <span
         class="badge hidden lg:inline-flex"
         :class="

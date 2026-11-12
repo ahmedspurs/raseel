@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { customerWindow } from '@raseel/shared'
+import type { ContactInfo } from '~/types/crm'
 import type { ConversationSummary, InboxMessage, InboxNote, PresenceViewer } from '~/types/inbox'
 
 const route = useRoute()
@@ -19,6 +20,15 @@ const hasMore = ref(false)
 const loadingOlder = ref(false)
 const notFound = ref(false)
 const scroller = ref<HTMLElement | null>(null)
+const showTemplate = ref(false)
+const contactInfo = ref<ContactInfo | null>(null)
+watch(showTemplate, async (open) => {
+  if (open && conversation.value) {
+    contactInfo.value = (
+      await api<{ contact: ContactInfo }>(`/contacts/${conversation.value.contact.id}`)
+    ).contact
+  }
+})
 
 type TimelineItem =
   | { kind: 'message'; at: string; key: string; message: InboxMessage }
@@ -195,6 +205,17 @@ useHead({ title: () => conversation.value?.contact.name ?? '' })
         </template>
       </div>
 
+      <div
+        v-if="!windowOpen && auth.can('conversations:reply')"
+        class="flex flex-wrap items-center justify-between gap-2 border-t border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100"
+      >
+        <span>{{
+          conversation.lastInboundAt ? $t('inbox.windowClosed') : $t('inbox.windowNever')
+        }}</span>
+        <button type="button" class="btn-primary py-1.5 text-xs" @click="showTemplate = true">
+          {{ $t('inbox.sendTemplate') }}
+        </button>
+      </div>
       <MessageComposer
         v-if="auth.can('conversations:reply') || auth.can('notes:write')"
         :key="id"
@@ -204,6 +225,12 @@ useHead({ title: () => conversation.value?.contact.name ?? '' })
         :window-open="windowOpen"
         @sent="onSent"
         @noted="onNoted"
+      />
+      <TemplateSender
+        v-if="showTemplate && contactInfo"
+        :contact="contactInfo"
+        @close="showTemplate = false"
+        @sent="showTemplate = false"
       />
     </template>
   </div>

@@ -25,7 +25,8 @@
     "actions": "Actions",
     "active": "Active",
     "inactive": "Inactive",
-    "never": "Never"
+    "never": "Never",
+    "loadMore": "Load more"
   },
   "roles": {
     "OWNER": "Owner",
@@ -57,7 +58,15 @@
     "invalid_team": "This team no longer exists.",
     "shortcut_taken": "This shortcut is already used.",
     "audio_format_unsupported": "This audio could not be converted for WhatsApp.",
-    "not_found": "Not found."
+    "not_found": "Not found.",
+    "contact_exists": "This number already exists.",
+    "invalid_custom_fields": "Some custom field values are not valid.",
+    "key_taken": "This key is already used.",
+    "key_immutable": "The key cannot be changed.",
+    "not_approved": "This template is not approved yet.",
+    "missing_variables": "Fill in every variable.",
+    "header_media_required": "This template needs a header media URL.",
+    "meta_error": "Meta rejected the request."
   },
   "setup": {
     "title": "Set up your workspace",
@@ -143,7 +152,8 @@
       "to": "To",
       "clear": "Clear filters",
       "OPEN": "Open",
-      "PENDING": "Pending"
+      "PENDING": "Pending",
+      "tag": "Tag"
     },
     "assignee": "Assignee",
     "unassigned": "Unassigned",
@@ -178,7 +188,9 @@
     "mentions": "Mentions",
     "noMentions": "No mentions yet.",
     "markAllRead": "Mark all as read",
-    "mentionedYou": "{name} mentioned you"
+    "mentionedYou": "{name} mentioned you",
+    "sendTemplate": "Send a template",
+    "viewContact": "Contact profile"
   },
   "settings": {
     "title": "Settings",
@@ -211,7 +223,10 @@
     "noTeams": "No teams yet. Teams let you route conversations to a group of agents.",
     "whatsapp": "WhatsApp",
     "quickReplies": "Quick replies",
-    "inbox": "Inbox"
+    "inbox": "Inbox",
+    "templates": "Templates",
+    "tags": "Tags",
+    "customFields": "Custom fields"
   },
   "whatsapp": {
     "title": "WhatsApp",
@@ -260,5 +275,123 @@
     "autoAssignHelp": "Assign each new or unassigned conversation to the next agent in turn (round robin).",
     "participants": "Who receives conversations",
     "participantsHelp": "Leave everyone unchecked to include all active agents and admins."
+  },
+  "contacts": {
+    "title": "Contacts",
+    "search": "Search by name, number, email or company",
+    "add": "Add contact",
+    "phone": "WhatsApp number",
+    "phoneHint": "With country code, e.g. +966 50 123 4567",
+    "total": "{n} contacts",
+    "empty": "No contacts match.",
+    "allTags": "All tags",
+    "optIn": "Marketing consent",
+    "optedIn": "Opted in",
+    "notOptedIn": "Not opted in",
+    "anyConsent": "Any consent",
+    "profile": "Profile",
+    "company": "Company",
+    "city": "City",
+    "notes": "Notes",
+    "tags": "Tags",
+    "customFields": "Custom fields",
+    "conversations": "Conversations",
+    "messages": "{n} messages",
+    "whatsappName": "WhatsApp name: {name}",
+    "openConversation": "Open conversation",
+    "sendTemplate": "Send template",
+    "consentHelp": "Only contacts who agreed may receive marketing broadcasts.",
+    "consentSince": "Since {date}",
+    "privacy": "Privacy",
+    "export": "Export data",
+    "exportHelp": "Download everything stored about this contact (PDPL).",
+    "delete": "Delete contact",
+    "deleteHelp": "Permanently deletes the contact, all conversations, messages and media. This cannot be undone.",
+    "deleteConfirm": "Type DELETE to confirm",
+    "exists": "This number already exists.",
+    "openExisting": "Open contact"
+  },
+  "templates": {
+    "title": "Message templates",
+    "intro": "Templates approved by Meta can be sent at any time, including after the 24-hour window.",
+    "sync": "Sync from Meta",
+    "synced": "{approved} approved of {total} templates",
+    "new": "New template",
+    "empty": "No templates yet. Sync from Meta or create one.",
+    "name": "Template name",
+    "nameHint": "Lowercase letters, numbers and _",
+    "language": "Language",
+    "category": "Category",
+    "header": "Header (optional)",
+    "body": "Body",
+    "bodyHint": "Use {'{{'}1{'}}'}, {'{{'}2{'}}'}… for variables.",
+    "examples": "Example values for review",
+    "example": "Example for {n}",
+    "footer": "Footer (optional)",
+    "buttons": "Quick reply buttons (optional)",
+    "addButton": "Add button",
+    "submit": "Submit for review",
+    "status": {
+      "APPROVED": "Approved",
+      "PENDING": "In review",
+      "REJECTED": "Rejected",
+      "PAUSED": "Paused",
+      "DISABLED": "Disabled",
+      "IN_APPEAL": "In appeal"
+    },
+    "categories": {
+      "MARKETING": "Marketing",
+      "UTILITY": "Utility",
+      "AUTHENTICATION": "Authentication"
+    },
+    "choose": "Choose a template",
+    "variables": "Variables",
+    "variable": "Variable {n}",
+    "typeValue": "Type a value",
+    "fromField": "Contact field",
+    "headerMedia": "Header media URL",
+    "preview": "Preview",
+    "send": "Send template",
+    "noApproved": "No approved templates. An admin can sync or create them in Settings → Templates.",
+    "fields": {
+      "name": "Name",
+      "firstName": "First name",
+      "phone": "Phone",
+      "email": "Email",
+      "company": "Company",
+      "city": "City"
+    }
+  },
+  "tags": {
+    "title": "Tags",
+    "new": "New tag",
+    "name": "Name",
+    "color": "Color",
+    "contacts": "{n} contacts",
+    "empty": "No tags yet."
+  },
+  "customFields": {
+    "title": "Custom fields",
+    "intro": "Extra fields shown on every contact profile.",
+    "new": "New field",
+    "key": "Key",
+    "keyHint": "Lowercase, used in templates as custom.key",
+    "label": "Label",
+    "type": "Type",
+    "options": "Options (one per line)",
+    "types": {
+      "TEXT": "Text",
+      "NUMBER": "Number",
+      "DATE": "Date",
+      "SELECT": "List"
+    },
+    "empty": "No custom fields yet."
+  },
+  "search": {
+    "placeholder": "Search messages and contacts…",
+    "contacts": "Contacts",
+    "messages": "Messages",
+    "none": "Nothing found for \"{q}\".",
+    "minChars": "Type at least 2 characters."
   }
 }

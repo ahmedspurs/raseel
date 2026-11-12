@@ -6,6 +6,7 @@ export interface InboxFilters {
   status: '' | 'OPEN' | 'PENDING'
   assigneeId: string
   teamId: string
+  tagId: string
   from: string
   to: string
 }
@@ -14,6 +15,7 @@ const emptyFilters = (): InboxFilters => ({
   status: '',
   assigneeId: '',
   teamId: '',
+  tagId: '',
   from: '',
   to: '',
 })
