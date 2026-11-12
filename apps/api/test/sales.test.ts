@@ -40,7 +40,12 @@ describe('deals pipeline (FR-33)', () => {
 
     // Drop "Implants" at the top of the second column.
     const moved = await api('PATCH', `/api/deals/${a.id}`, { stageId: stages[1]!.id, position: 0 })
-    expect(moved.json().deal).toMatchObject({ stageId: stages[1]!.id, position: 0 })
+    // Moving must not touch other fields (regression: value was reset to 0).
+    expect(moved.json().deal).toMatchObject({
+      stageId: stages[1]!.id,
+      position: 0,
+      valueSar: 1500.5,
+    })
     const list = (await api('GET', '/api/deals')).json().deals as { id: string; position: number }[]
     expect(list.find((d) => d.id === b.id)?.position).toBe(1)
 

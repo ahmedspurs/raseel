@@ -69,3 +69,16 @@ describe('schemas', () => {
     expect(parseYes('no')).toBe(false)
   })
 })
+
+describe('update schemas keep unspecified fields untouched', () => {
+  it('does not reset a deal value when only moving it', async () => {
+    const { dealUpdateSchema, taskUpdateSchema } = await import('./sales.js')
+    const { contactUpdateSchema } = await import('./crm.js')
+    expect(dealUpdateSchema.parse({ stageId: 's1', position: 0 })).toEqual({
+      stageId: 's1',
+      position: 0,
+    })
+    expect(taskUpdateSchema.parse({ done: true })).toEqual({ done: true })
+    expect(contactUpdateSchema.parse({ city: 'جدة' })).toEqual({ city: 'جدة' })
+  })
+})

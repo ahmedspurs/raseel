@@ -25,13 +25,19 @@ export const dealSchema = z.object({
   ownerId: z.string().nullable().optional(),
   expectedClose: isoDay.nullable().optional(),
 })
-export const dealUpdateSchema = dealSchema
-  .partial()
-  .omit({ contactId: true })
-  .extend({
-    /** Drop position within the target stage (Kanban drag). */
-    position: z.number().int().min(0).optional(),
-  })
+/**
+ * Explicit fields without defaults: `dealSchema.partial()` would keep
+ * `valueSar`'s default and reset the value to 0 on every update.
+ */
+export const dealUpdateSchema = z.object({
+  title: z.string().trim().min(1).max(120).optional(),
+  stageId: z.string().optional(),
+  valueSar: z.coerce.number().min(0).max(1_000_000_000).optional(),
+  ownerId: z.string().nullable().optional(),
+  expectedClose: isoDay.nullable().optional(),
+  /** Drop position within the target stage (Kanban drag). */
+  position: z.number().int().min(0).optional(),
+})
 
 // ── FR-34: tasks ──
 
