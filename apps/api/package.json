@@ -11,7 +11,9 @@
     "test": "vitest run",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:dev": "prisma migrate dev"
+    "db:dev": "prisma migrate dev",
+    "worker": "tsx --env-file=.env src/worker.ts",
+    "start:worker": "node dist/worker.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.5",
@@ -30,6 +32,7 @@
     "nodemailer": "^10.5.0",
     "otplib": "^13.6.0",
     "pg": "^8.23.1",
+    "pino": "^10.4.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
