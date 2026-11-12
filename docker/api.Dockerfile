@@ -1,6 +1,6 @@
 # Raseel API and worker image (same image, different command).
 
-FROM node:22-alpine AS base
+FROM node:25-alpine AS base
 RUN npm install -g pnpm@12.3.4 && apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -21,7 +21,7 @@ COPY apps/api/prisma apps/api/prisma
 RUN pnpm install --frozen-lockfile --prod --filter "@raseel/api..."
 
 # ── Runtime ──
-FROM node:22-alpine AS runtime
+FROM node:25-alpine AS runtime
 RUN apk add --no-cache libc6-compat tini
 ENV NODE_ENV=production \
     NODE_OPTIONS=--max-old-space-size=384

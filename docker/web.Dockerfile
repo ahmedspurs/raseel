@@ -1,7 +1,7 @@
 # Raseel web: the static Nuxt build served by Caddy, which also proxies the API
 # and obtains HTTPS certificates automatically.
 
-FROM node:22-alpine AS build
+FROM node:25-alpine AS build
 RUN npm install -g pnpm@12.3.4
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
