@@ -288,7 +288,7 @@ export class TemplateService {
       where: { id: conversation.id },
       data: {
         lastMessageAt: message.createdAt,
-        lastMessagePreview: `📝 ${rendered.slice(0, 120)}`,
+        lastMessagePreview: rendered.slice(0, 140),
         ...(reopen && conversation.status === 'CLOSED' ? { status: 'OPEN', closedAt: null } : {}),
       },
     })

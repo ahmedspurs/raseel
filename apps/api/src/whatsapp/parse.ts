@@ -264,18 +264,12 @@ export function parseWebhook(payload: unknown, phoneNumberId: string | null): Pa
   return result
 }
 
-/** Short text for the conversation list. */
+/**
+ * Short text for the conversation list. Messages without text store a type
+ * token such as "[IMAGE]", which the web app shows as an icon and a
+ * translated label.
+ */
 export function messagePreview(type: MessageType, body: string | null): string {
   if (body) return body.slice(0, 140)
-  const labels: Partial<Record<MessageType, string>> = {
-    IMAGE: '📷',
-    VIDEO: '🎥',
-    AUDIO: '🎤',
-    DOCUMENT: '📄',
-    STICKER: '🏷️',
-    LOCATION: '📍',
-    CONTACTS: '👤',
-    TEMPLATE: '📝',
-  }
-  return labels[type] ?? '…'
+  return `[${type}]`
 }

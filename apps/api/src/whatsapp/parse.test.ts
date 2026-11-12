@@ -131,7 +131,7 @@ describe('parseWebhook', () => {
 describe('messagePreview', () => {
   it('uses body text or a type icon', () => {
     expect(messagePreview('TEXT', 'hello')).toBe('hello')
-    expect(messagePreview('IMAGE', null)).toBe('📷')
+    expect(messagePreview('IMAGE', null)).toBe('[IMAGE]')
   })
 })
 
