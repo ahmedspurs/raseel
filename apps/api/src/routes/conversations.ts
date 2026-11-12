@@ -12,6 +12,8 @@ import type { Contact, Conversation, Db, Message, User } from '../lib/db.js'
 import { currentUser, requirePermission } from '../plugins/auth.js'
 import { AssignmentError, conversationWhere } from '../services/assignment.js'
 import { OutboundError } from '../services/outbound.js'
+import { needsTranscode, toOggOpus, TranscodeError } from '../services/transcode.js'
+import { jobId } from '../lib/queues.js'
 
 const messagesQuery = z.object({
   before: z.string().optional(),
@@ -93,7 +95,7 @@ export async function loadConversationDto(db: Db, conversationId: string) {
 }
 
 export const conversationRoutes: FastifyPluginAsync = async (app) => {
-  const { db, outbound, events, config, assignment } = app.ctx
+  const { db, outbound, events, config, assignment, queues } = app.ctx
   const canView = requirePermission('conversations:view')
   const canReply = requirePermission('conversations:reply')
 
@@ -177,11 +179,24 @@ export const conversationRoutes: FastifyPluginAsync = async (app) => {
 
   app.post('/:id/read', { preHandler: canView }, async (req) => {
     const { id } = req.params as { id: string }
-    await db.conversation.updateMany({
+    const res = await db.conversation.updateMany({
       where: { id, unreadCount: { gt: 0 } },
       data: { unreadCount: 0 },
     })
-    await events.publish({ type: 'conversation.updated', conversationId: id })
+    if (res.count > 0) {
+      await events.publish({ type: 'conversation.updated', conversationId: id })
+      // Show the customer blue ticks on their latest message.
+      const last = await db.message.findFirst({
+        where: { conversationId: id, direction: 'INBOUND', waMessageId: { not: null } },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+      })
+      if (last) {
+        await queues.send
+          .add('read', { messageId: last.id }, { jobId: jobId('read', last.id), attempts: 3 })
+          .catch((err: unknown) => req.log.warn({ err }, 'failed to queue read receipt'))
+      }
+    }
     return { ok: true }
   })
 
@@ -205,6 +220,18 @@ export const conversationRoutes: FastifyPluginAsync = async (app) => {
           }
         }
         if (!file) return reply.code(400).send({ error: 'file_required' })
+        if (needsTranscode(file.mime)) {
+          try {
+            const ogg = await toOggOpus(file.data, config.FFMPEG_PATH)
+            file = { data: Buffer.from(ogg), mime: 'audio/ogg', filename: 'voice-note.ogg' }
+          } catch (err) {
+            if (err instanceof TranscodeError) {
+              req.log.warn({ err: err.message }, 'voice note conversion failed')
+              return reply.code(415).send({ error: 'audio_format_unsupported' })
+            }
+            throw err
+          }
+        }
         const kind = mediaKindFor(file.mime)
         if (file.data.byteLength > MEDIA_LIMITS[kind].maxBytes) {
           return reply

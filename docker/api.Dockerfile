@@ -22,7 +22,8 @@ RUN pnpm install --frozen-lockfile --prod --filter "@raseel/api..."
 
 # ── Runtime ──
 FROM node:22-alpine AS runtime
-RUN apk add --no-cache libc6-compat tini
+# ffmpeg converts browser voice recordings to OGG/Opus for WhatsApp.
+RUN apk add --no-cache libc6-compat tini ffmpeg
 ENV NODE_ENV=production \
     NODE_OPTIONS=--max-old-space-size=384
 WORKDIR /app

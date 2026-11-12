@@ -387,6 +387,20 @@ describe('sending replies (FR-11, FR-12, FR-13, NFR-05)', () => {
     expect(mock.media.get(image.id)?.data.toString()).toBe('png-bytes')
   })
 
+  it('sends the customer a read receipt when an agent opens the conversation', async () => {
+    const last = await h.ctx.db.message.findFirstOrThrow({ where: { direction: 'INBOUND' } })
+    await h.app.inject({
+      method: 'POST',
+      url: `/api/conversations/${conversationId}/read`,
+      headers: { cookie: owner },
+    })
+    const job = await h.ctx.queues.send.getJob(jobId('read', last.id))
+    expect(job?.name).toBe('read')
+
+    expect(await h.ctx.outbound.markRead(last.id)).toBe(true)
+    expect(mock.reads).toContain(last.waMessageId)
+  })
+
   it('lists conversations and messages with reply context', async () => {
     await customerSays('second message')
     const list = await h.app.inject({

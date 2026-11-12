@@ -162,6 +162,16 @@ export class OutboundService {
     }
   }
 
+  /** Sends a read receipt (blue ticks) for a customer's message. Best effort. */
+  async markRead(messageId: string): Promise<boolean> {
+    const { db, whatsapp } = this.deps
+    const message = await db.message.findUnique({ where: { id: messageId } })
+    if (!message?.waMessageId || message.direction !== 'INBOUND') return false
+    const client = await whatsapp.client()
+    await client.markRead(message.waMessageId)
+    return true
+  }
+
   /** Re-queues a failed message (agent clicks "retry"). */
   async retry(messageId: string): Promise<boolean> {
     const { db, queues } = this.deps

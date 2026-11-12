@@ -41,6 +41,7 @@ const workers = [
   new Worker<SendJob>(
     QueueName.Send,
     async (job) => {
+      if (job.name === 'read') return ctx.outbound.markRead(job.data.messageId)
       try {
         return await ctx.outbound.send(job.data.messageId, { finalAttempt: isFinalAttempt(job) })
       } catch (err) {
