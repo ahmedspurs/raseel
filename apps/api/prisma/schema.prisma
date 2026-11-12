@@ -1,0 +1,373 @@
+// Raseel data model (SRS §5.2)
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Workspace & users ─────────────────────────────
+
+enum Role {
+  OWNER
+  ADMIN
+  AGENT
+  VIEWER
+}
+
+enum Language {
+  ar
+  en
+}
+
+/// Key/value settings. Secret values are encrypted (NFR-08).
+model Setting {
+  key       String   @id
+  value     String
+  encrypted Boolean  @default(false)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String?   @map("password_hash")
+  role         Role      @default(AGENT)
+  language     Language  @default(ar)
+  active       Boolean   @default(true)
+  /// Encrypted TOTP secret; null when 2FA is off.
+  totpSecret   String?   @map("totp_secret")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  sessions     Session[]
+  teams        TeamMember[]
+  invitations  Invitation[]   @relation("InvitedBy")
+  assigned     Conversation[] @relation("Assignee")
+  sentMessages Message[]
+  notes        Note[]
+  mentions     NoteMention[]
+  auditLogs    AuditLog[]
+  quickReplies QuickReply[]
+
+  @@map("users")
+}
+
+model Session {
+  id         String   @id
+  userId     String   @map("user_id")
+  /// SHA-256 of the session token; the raw token only lives in the cookie.
+  tokenHash  String   @unique @map("token_hash")
+  userAgent  String?  @map("user_agent")
+  ip         String?
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  name        String
+  role        Role
+  teamIds     String[]  @map("team_ids")
+  tokenHash   String    @unique @map("token_hash")
+  invitedById String    @map("invited_by_id")
+  expiresAt   DateTime  @map("expires_at")
+  acceptedAt  DateTime? @map("accepted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  invitedBy User @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@map("invitations")
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members       TeamMember[]
+  conversations Conversation[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  teamId String @map("team_id")
+  userId String @map("user_id")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([teamId, userId])
+  @@index([userId])
+  @@map("team_members")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  action    String
+  target    String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// ───────────────────────────── Contacts ─────────────────────────────
+
+model Contact {
+  id             String    @id @default(cuid())
+  /// WhatsApp ID (phone number in international format, digits only).
+  waId           String    @unique @map("wa_id")
+  name           String?
+  /// Profile name as reported by WhatsApp.
+  waName         String?   @map("wa_name")
+  email          String?
+  company        String?
+  city           String?
+  language       Language?
+  customFields   Json      @default("{}") @map("custom_fields")
+  notes          String?
+  optInMarketing Boolean   @default(false) @map("opt_in_marketing")
+  optedInAt      DateTime? @map("opted_in_at")
+  optedOutAt     DateTime? @map("opted_out_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  tags          ContactTag[]
+  conversations Conversation[]
+
+  @@index([name])
+  @@map("contacts")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#64748b")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  contacts ContactTag[]
+
+  @@map("tags")
+}
+
+model ContactTag {
+  contactId String @map("contact_id")
+  tagId     String @map("tag_id")
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, tagId])
+  @@index([tagId])
+  @@map("contact_tags")
+}
+
+// ───────────────────────────── Inbox ─────────────────────────────
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  CLOSED
+}
+
+model Conversation {
+  id                 String             @id @default(cuid())
+  contactId          String             @map("contact_id")
+  assigneeId         String?            @map("assignee_id")
+  teamId             String?            @map("team_id")
+  status             ConversationStatus @default(OPEN)
+  /// Last customer message; drives the 24-hour window (FR-13).
+  lastInboundAt      DateTime?          @map("last_inbound_at")
+  lastMessageAt      DateTime?          @map("last_message_at")
+  lastMessagePreview String?            @map("last_message_preview")
+  unreadCount        Int                @default(0) @map("unread_count")
+  closedAt           DateTime?          @map("closed_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  contact  Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  assignee User?     @relation("Assignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  team     Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  messages Message[]
+  notes    Note[]
+
+  @@index([status, lastMessageAt(sort: Desc)])
+  @@index([assigneeId, status])
+  @@index([teamId, status])
+  @@index([contactId])
+  @@map("conversations")
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  STICKER
+  LOCATION
+  CONTACTS
+  REACTION
+  INTERACTIVE
+  BUTTON
+  TEMPLATE
+  UNSUPPORTED
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  RECEIVED
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  conversationId String           @map("conversation_id")
+  direction      MessageDirection
+  type           MessageType
+  body           String?
+  /// Type-specific payload (location, contacts, interactive reply, template vars...).
+  payload        Json?
+  /// Meta media id (inbound) or uploaded media id (outbound).
+  mediaId        String?          @map("media_id")
+  /// Local storage path once the media is downloaded.
+  mediaPath      String?          @map("media_path")
+  mediaMime      String?          @map("media_mime")
+  mediaFilename  String?          @map("media_filename")
+  waMessageId    String?          @unique @map("wa_message_id")
+  /// wamid this message replies to / reacts to.
+  replyToWaId    String?          @map("reply_to_wa_id")
+  status         MessageStatus
+  error          Json?
+  sentByUserId   String?          @map("sent_by_user_id")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sentBy       User?        @relation(fields: [sentByUserId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model Note {
+  id             String   @id @default(cuid())
+  conversationId String   @map("conversation_id")
+  authorId       String?  @map("author_id")
+  body           String
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  author       User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  mentions     NoteMention[]
+
+  @@index([conversationId, createdAt])
+  @@map("notes")
+}
+
+model NoteMention {
+  noteId String    @map("note_id")
+  userId String    @map("user_id")
+  readAt DateTime? @map("read_at")
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, userId])
+  @@index([userId, readAt])
+  @@map("note_mentions")
+}
+
+model QuickReply {
+  id          String    @id @default(cuid())
+  /// Shortcut typed after "/" (FR-18).
+  shortcut    String    @unique
+  title       String
+  body        String
+  language    Language?
+  createdById String?   @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@map("quick_replies")
+}
+
+// ───────────────────────────── WhatsApp ─────────────────────────────
+
+enum TemplateCategory {
+  MARKETING
+  UTILITY
+  AUTHENTICATION
+}
+
+model Template {
+  id             String           @id @default(cuid())
+  metaTemplateId String?          @unique @map("meta_template_id")
+  name           String
+  language       String
+  category       TemplateCategory
+  components     Json
+  status         String
+  rejectedReason String?          @map("rejected_reason")
+  syncedAt       DateTime?        @map("synced_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@unique([name, language])
+  @@map("templates")
+}
+
+enum WebhookEventStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+/// Raw Meta webhook payloads, stored before processing so nothing is lost (NFR-04).
+model WebhookEvent {
+  id          String             @id @default(cuid())
+  payload     Json
+  status      WebhookEventStatus @default(PENDING)
+  attempts    Int                @default(0)
+  error       String?
+  receivedAt  DateTime           @default(now()) @map("received_at")
+  processedAt DateTime?          @map("processed_at")
+
+  @@index([status, receivedAt])
+  @@map("webhook_events")
+}
