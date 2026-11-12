@@ -1,5 +1,5 @@
-import { execSync } from 'node:child_process'
 import pg from 'pg'
+import { migrate } from '../src/migrate.js'
 import { TEST_DATABASE_URL } from './env.js'
 
 /** Creates the test database if needed and applies migrations once per run. */
@@ -12,8 +12,5 @@ export default async function setup() {
   if (exists.rowCount === 0) await admin.query(`CREATE DATABASE "${dbName}"`)
   await admin.end()
 
-  execSync('npx prisma migrate deploy', {
-    stdio: 'ignore',
-    env: { ...process.env, DATABASE_URL: TEST_DATABASE_URL },
-  })
+  await migrate(TEST_DATABASE_URL)
 }
