@@ -7,6 +7,7 @@ import {
   type StatusUpdate,
 } from '../whatsapp/parse.js'
 import type { AssignmentService } from './assignment.js'
+import type { AutomationService } from './automation.js'
 import type { EventBus } from './events.js'
 import type { MediaStorage } from './media.js'
 import { contactSearchText, messageSearchText } from './search.js'
@@ -31,6 +32,9 @@ const STATUS_MAP = {
 
 const later = (a: Date | null, b: Date) => (a && a > b ? a : b)
 
+/** Message types that carry text automations can react to. */
+const AUTOMATION_TYPES = new Set<InboundMessage['type']>(['TEXT', 'INTERACTIVE', 'BUTTON'])
+
 interface Deps {
   db: Db
   queues: Queues
@@ -38,6 +42,8 @@ interface Deps {
   whatsapp: WhatsAppService
   media: MediaStorage
   assignment?: AssignmentService
+  automation?: AutomationService
+  log?: { error: (obj: object, msg: string) => void }
 }
 
 /** Turns stored webhook events into contacts, conversations, messages and statuses. */
@@ -146,8 +152,31 @@ export class InboundService {
     if (m.media) {
       await queues.media.add('download', { messageId }, { jobId: jobId('media', messageId) })
     }
+    // Automations run before round robin so a keyword rule can choose the assignee.
+    if (this.deps.automation && AUTOMATION_TYPES.has(m.type)) {
+      const firstMessage =
+        (await db.message.count({
+          where: { conversation: { contactId: contact.id }, direction: 'INBOUND' },
+        })) === 1
+      try {
+        await this.deps.automation.onInbound({
+          conversationId: conversation.id,
+          contactId: contact.id,
+          messageId,
+          body: m.body,
+          firstMessage,
+        })
+      } catch (err) {
+        // A failing automation must never lose or block the customer's message.
+        this.deps.log?.error({ err }, 'automation failed')
+      }
+    }
     // FR-15: hand new or unassigned conversations to the next agent in turn.
-    if (!conversation.assigneeId) await this.deps.assignment?.autoAssign(conversation.id)
+    const current = await db.conversation.findUnique({
+      where: { id: conversation.id },
+      select: { assigneeId: true },
+    })
+    if (!current?.assigneeId) await this.deps.assignment?.autoAssign(conversation.id)
     await events.publish({ type: 'message.created', conversationId: conversation.id, messageId })
     await events.publish({ type: 'conversation.updated', conversationId: conversation.id })
     return messageId

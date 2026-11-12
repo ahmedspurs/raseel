@@ -3,10 +3,12 @@ import { type Config, loadConfig } from './config.js'
 import type { AppContext } from './context.js'
 import { Cipher, parseKey } from './lib/crypto.js'
 import { createDb } from './lib/db.js'
+import { createLogger } from './lib/logger.js'
 import { createQueues } from './lib/queues.js'
 import { AssignmentService } from './services/assignment.js'
 import { AuditService } from './services/audit.js'
 import { AuthService } from './services/auth.js'
+import { AutomationService } from './services/automation.js'
 import { EventBus } from './services/events.js'
 import { InboundService } from './services/inbound.js'
 import { Mailer } from './services/mailer.js'
@@ -28,7 +30,10 @@ export function createContext(config: Config = loadConfig()): AppContext {
   const whatsapp = new WhatsAppService(settings, config)
   const audit = new AuditService(db)
   const assignment = new AssignmentService({ db, redis, settings, events, audit })
-  const messaging = { db, queues, events, whatsapp, media, assignment }
+  const outbound = new OutboundService({ db, queues, events, whatsapp, media })
+  const automation = new AutomationService({ db, redis, settings, events, audit, outbound })
+  const log = createLogger(config)
+  const messaging = { db, queues, events, whatsapp, media, assignment, automation, log }
 
   return {
     config,
@@ -44,9 +49,10 @@ export function createContext(config: Config = loadConfig()): AppContext {
     media,
     whatsapp,
     inbound: new InboundService(messaging),
-    outbound: new OutboundService(messaging),
+    outbound,
     assignment,
     templates: new TemplateService(messaging),
+    automation,
   }
 }
 

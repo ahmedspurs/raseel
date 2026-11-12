@@ -13,6 +13,7 @@ export const SettingKey = {
   WhatsAppFirstWebhookAt: 'whatsapp.first_webhook_at',
   WhatsAppPhone: 'whatsapp.phone',
   InboxSettings: 'inbox.settings',
+  AutomationSettings: 'automation.settings',
 } as const
 export type SettingKey = (typeof SettingKey)[keyof typeof SettingKey]
 

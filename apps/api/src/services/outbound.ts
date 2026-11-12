@@ -167,6 +167,53 @@ export class OutboundService {
     }
   }
 
+  /**
+   * Messages sent by automations (welcome, away, keyword replies). They follow the
+   * customer's message, so the 24-hour window is open; optional reply buttons are
+   * sent as an interactive message.
+   */
+  async createAutomated(
+    conversationId: string,
+    input: { body: string; buttons?: string[] },
+  ): Promise<Message> {
+    const { db, queues, events } = this.deps
+    const buttons = (input.buttons ?? []).filter(Boolean).slice(0, 3)
+    const interactive = buttons.length
+      ? {
+          type: 'button',
+          body: { text: input.body },
+          action: {
+            buttons: buttons.map((title, i) => ({
+              type: 'reply',
+              reply: { id: `btn_${i + 1}`, title: title.slice(0, 20) },
+            })),
+          },
+        }
+      : null
+    const message = await db.message.create({
+      data: {
+        conversationId,
+        direction: 'OUTBOUND',
+        type: interactive ? 'INTERACTIVE' : 'TEXT',
+        body: input.body,
+        searchText: messageSearchText(input.body),
+        payload: interactive ? { interactive, buttons } : undefined,
+        status: 'QUEUED',
+        automated: true,
+      },
+    })
+    await db.conversation.update({
+      where: { id: conversationId },
+      data: {
+        lastMessageAt: message.createdAt,
+        lastMessagePreview: messagePreview(message.type, input.body),
+      },
+    })
+    await queues.send.add('send', { messageId: message.id }, { jobId: jobId('send', message.id) })
+    await events.publish({ type: 'message.created', conversationId, messageId: message.id })
+    return message
+  }
+
   /** Sends a read receipt (blue ticks) for a customer's message. Best effort. */
   async markRead(messageId: string): Promise<boolean> {
     const { db, whatsapp } = this.deps
@@ -216,6 +263,10 @@ function toOutbound(message: Message, mediaId: string | null): OutboundMessage {
         type: 'document',
         document: { id: mediaId!, caption, filename: message.mediaFilename ?? undefined },
       }
+    case 'INTERACTIVE': {
+      const { interactive } = message.payload as { interactive: Record<string, unknown> }
+      return { type: 'interactive', interactive }
+    }
     case 'TEMPLATE': {
       const { template } = message.payload as unknown as TemplatePayload
       return { type: 'template', template }

@@ -45,6 +45,7 @@ export type OutboundMessage =
   | { type: 'sticker'; sticker: { id: string } }
   | { type: 'reaction'; reaction: { message_id: string; emoji: string } }
   | { type: 'template'; template: Record<string, unknown> }
+  | { type: 'interactive'; interactive: Record<string, unknown> }
 
 interface GraphErrorBody {
   error?: {
