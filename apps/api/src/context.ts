@@ -3,6 +3,7 @@ import type { Config } from './config.js'
 import type { Cipher } from './lib/crypto.js'
 import type { Db } from './lib/db.js'
 import type { Queues } from './lib/queues.js'
+import type { AssignmentService } from './services/assignment.js'
 import type { AuditService } from './services/audit.js'
 import type { AuthService } from './services/auth.js'
 import type { EventBus } from './services/events.js'
@@ -29,6 +30,7 @@ export interface AppContext {
   whatsapp: WhatsAppService
   inbound: InboundService
   outbound: OutboundService
+  assignment: AssignmentService
 }
 
 declare module 'fastify' {

@@ -4,6 +4,7 @@ import type { AppContext } from './context.js'
 import { Cipher, parseKey } from './lib/crypto.js'
 import { createDb } from './lib/db.js'
 import { createQueues } from './lib/queues.js'
+import { AssignmentService } from './services/assignment.js'
 import { AuditService } from './services/audit.js'
 import { AuthService } from './services/auth.js'
 import { EventBus } from './services/events.js'
@@ -24,7 +25,9 @@ export function createContext(config: Config = loadConfig()): AppContext {
   const events = new EventBus(redis)
   const media = new MediaStorage(config.MEDIA_DIR)
   const whatsapp = new WhatsAppService(settings, config)
-  const messaging = { db, queues, events, whatsapp, media }
+  const audit = new AuditService(db)
+  const assignment = new AssignmentService({ db, redis, settings, events, audit })
+  const messaging = { db, queues, events, whatsapp, media, assignment }
 
   return {
     config,
@@ -33,7 +36,7 @@ export function createContext(config: Config = loadConfig()): AppContext {
     cipher,
     settings,
     auth: new AuthService(db, cipher, config),
-    audit: new AuditService(db),
+    audit,
     mailer: new Mailer(config),
     queues,
     events,
@@ -41,6 +44,7 @@ export function createContext(config: Config = loadConfig()): AppContext {
     whatsapp,
     inbound: new InboundService(messaging),
     outbound: new OutboundService(messaging),
+    assignment,
   }
 }
 

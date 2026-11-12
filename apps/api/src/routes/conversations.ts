@@ -1,15 +1,17 @@
-import { customerWindow, MEDIA_LIMITS, mediaKindFor, sendTextSchema } from '@raseel/shared'
+import {
+  conversationListQuerySchema,
+  conversationUpdateSchema,
+  customerWindow,
+  MEDIA_LIMITS,
+  mediaKindFor,
+  sendTextSchema,
+} from '@raseel/shared'
 import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import type { Contact, Conversation, Message, User } from '../lib/db.js'
 import { currentUser, requirePermission } from '../plugins/auth.js'
+import { AssignmentError, conversationWhere } from '../services/assignment.js'
 import { OutboundError } from '../services/outbound.js'
-
-const listQuery = z.object({
-  status: z.enum(['OPEN', 'PENDING', 'CLOSED', 'ALL']).default('ALL'),
-  cursor: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(30),
-})
 
 const messagesQuery = z.object({
   before: z.string().optional(),
@@ -67,14 +69,21 @@ export function messageDto(
 }
 
 export const conversationRoutes: FastifyPluginAsync = async (app) => {
-  const { db, outbound, events, config } = app.ctx
+  const { db, outbound, events, config, assignment } = app.ctx
   const canView = requirePermission('conversations:view')
   const canReply = requirePermission('conversations:reply')
 
+  const teamIdsOf = async (userId: string) =>
+    (await db.teamMember.findMany({ where: { userId }, select: { teamId: true } })).map(
+      (t) => t.teamId,
+    )
+
+  /** FR-14: Mine, Unassigned, Team, All and Closed views with agent, team and date filters. */
   app.get('/', { preHandler: canView }, async (req) => {
-    const q = listQuery.parse(req.query)
+    const q = conversationListQuerySchema.parse(req.query)
+    const user = currentUser(req)
     const rows = await db.conversation.findMany({
-      where: q.status === 'ALL' ? {} : { status: q.status },
+      where: conversationWhere(q, user, await teamIdsOf(user.id)),
       include: { contact: true },
       orderBy: [{ lastMessageAt: { sort: 'desc', nulls: 'last' } }, { id: 'desc' }],
       take: q.limit + 1,
@@ -87,11 +96,29 @@ export const conversationRoutes: FastifyPluginAsync = async (app) => {
     }
   })
 
+  app.get('/counts', { preHandler: canView }, async (req) => {
+    const user = currentUser(req)
+    return { counts: await assignment.counts(user, await teamIdsOf(user.id)) }
+  })
+
   app.get('/:id', { preHandler: canView }, async (req, reply) => {
     const { id } = req.params as { id: string }
     const c = await db.conversation.findUnique({ where: { id }, include: { contact: true } })
     if (!c) return reply.code(404).send({ error: 'not_found' })
     return { conversation: conversationDto(c) }
+  })
+
+  /** FR-15, FR-16: assign to an agent or team, and change status. */
+  app.patch('/:id', { preHandler: canView }, async (req, reply) => {
+    const { id } = req.params as { id: string }
+    const input = conversationUpdateSchema.parse(req.body)
+    try {
+      const updated = await assignment.update(id, currentUser(req), input, req.ip)
+      return { conversation: conversationDto(updated) }
+    } catch (err) {
+      if (err instanceof AssignmentError) return reply.code(err.status).send({ error: err.code })
+      throw err
+    }
   })
 
   app.get('/:id/messages', { preHandler: canView }, async (req) => {

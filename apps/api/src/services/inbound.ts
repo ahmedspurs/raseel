@@ -6,6 +6,7 @@ import {
   parseWebhook,
   type StatusUpdate,
 } from '../whatsapp/parse.js'
+import type { AssignmentService } from './assignment.js'
 import type { EventBus } from './events.js'
 import type { MediaStorage } from './media.js'
 import type { WhatsAppService } from './whatsapp.js'
@@ -35,6 +36,7 @@ interface Deps {
   events: EventBus
   whatsapp: WhatsAppService
   media: MediaStorage
+  assignment?: AssignmentService
 }
 
 /** Turns stored webhook events into contacts, conversations, messages and statuses. */
@@ -125,6 +127,8 @@ export class InboundService {
     if (m.media) {
       await queues.media.add('download', { messageId }, { jobId: jobId('media', messageId) })
     }
+    // FR-15: hand new or unassigned conversations to the next agent in turn.
+    if (!conversation.assigneeId) await this.deps.assignment?.autoAssign(conversation.id)
     await events.publish({ type: 'message.created', conversationId: conversation.id, messageId })
     await events.publish({ type: 'conversation.updated', conversationId: conversation.id })
     return messageId

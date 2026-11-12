@@ -12,8 +12,7 @@ export const SettingKey = {
   WhatsAppVerifyToken: 'whatsapp.verify_token',
   WhatsAppFirstWebhookAt: 'whatsapp.first_webhook_at',
   WhatsAppPhone: 'whatsapp.phone',
-  AutoAssign: 'inbox.auto_assign',
-  AutoAssignCursor: 'inbox.auto_assign_cursor',
+  InboxSettings: 'inbox.settings',
 } as const
 export type SettingKey = (typeof SettingKey)[keyof typeof SettingKey]
 
