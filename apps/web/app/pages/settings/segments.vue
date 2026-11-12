@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next'
 import type { CustomFieldDef, TagInfo } from '~/types/crm'
 import type { SegmentFilter, SegmentInfo } from '~/types/sales'
 
@@ -66,7 +67,10 @@ watch(
     clearTimeout(debounce)
     if (!filter) return
     debounce = setTimeout(async () => {
-      preview.value = await api('/segments/preview', { method: 'POST', body: { filter } })
+      preview.value = await api<{ audience: number; matching: number }>('/segments/preview', {
+        method: 'POST',
+        body: { filter },
+      })
     }, 300)
   },
   { deep: true },
@@ -158,7 +162,7 @@ const tagName = (id: string) => data.value?.tags.find((x) => x.id === id)?.name 
             class="px-2 text-slate-500"
             @click="editing.conditions.splice(i, 1)"
           >
-            ✕
+            <X class="size-4" :stroke-width="1.5" aria-hidden="true" />
           </button>
         </div>
         <button

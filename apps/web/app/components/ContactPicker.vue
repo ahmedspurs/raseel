@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next'
 import type { ContactInfo } from '~/types/crm'
 
 const model = defineModel<string>({ required: true })
@@ -39,7 +40,7 @@ function choose(c: ContactInfo) {
         :aria-label="$t('common.cancel')"
         @click="model = ''"
       >
-        ✕
+        <X class="size-4" :stroke-width="1.5" aria-hidden="true" />
       </button>
     </div>
     <template v-else>

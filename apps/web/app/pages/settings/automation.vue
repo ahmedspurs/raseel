@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MessageSquare, Tag, UserRound, Users } from 'lucide-vue-next'
 import type { AutomationSettings } from '@raseel/shared'
 import type { TagInfo } from '~/types/crm'
 
@@ -310,13 +311,25 @@ const tagName = (id?: string | null) => data.value?.tags.find((x) => x.id === id
               {{ r.keywords.join('، ') }}
             </p>
             <p class="mt-1 flex flex-wrap gap-2 text-xs text-slate-500">
-              <span v-if="r.actions.tagId">🏷️ {{ tagName(r.actions.tagId) }}</span>
-              <span v-if="r.actions.assigneeId"
-                >👤 {{ directory.userName(r.actions.assigneeId) }}</span
+              <span v-if="r.actions.tagId" class="flex items-center gap-1"
+                ><Tag class="size-3.5" :stroke-width="1.5" aria-hidden="true" />{{
+                  tagName(r.actions.tagId)
+                }}</span
               >
-              <span v-if="r.actions.teamId">👥 {{ directory.teamName(r.actions.teamId) }}</span>
-              <span v-if="r.actions.reply" class="line-clamp-1" dir="auto"
-                >💬 {{ r.actions.reply }}</span
+              <span v-if="r.actions.assigneeId" class="flex items-center gap-1"
+                ><UserRound class="size-3.5" :stroke-width="1.5" aria-hidden="true" />{{
+                  directory.userName(r.actions.assigneeId)
+                }}</span
+              >
+              <span v-if="r.actions.teamId" class="flex items-center gap-1"
+                ><Users class="size-3.5" :stroke-width="1.5" aria-hidden="true" />{{
+                  directory.teamName(r.actions.teamId)
+                }}</span
+              >
+              <span v-if="r.actions.reply" class="flex min-w-0 items-center gap-1" dir="auto"
+                ><MessageSquare class="size-3.5" :stroke-width="1.5" aria-hidden="true" />{{
+                  r.actions.reply
+                }}</span
               >
             </p>
           </div>

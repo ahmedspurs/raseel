@@ -11,6 +11,7 @@ interface MessageHit {
 }
 
 const api = useApi()
+const router = useRouter()
 const { shortDate } = useFormat()
 const q = ref('')
 const open = ref(false)
@@ -28,7 +29,9 @@ watch(q, (value) => {
   debounce = setTimeout(async () => {
     loading.value = true
     try {
-      results.value = await api('/search', { query: { q: value.trim() } })
+      results.value = await api<{ contacts: ContactInfo[]; messages: MessageHit[] }>('/search', {
+        query: { q: value.trim() },
+      })
     } finally {
       loading.value = false
     }
@@ -50,7 +53,7 @@ function snippet(body: string | null) {
 function go(path: string) {
   open.value = false
   q.value = ''
-  void navigateTo(path)
+  void router.push(path)
 }
 </script>
 

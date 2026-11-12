@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { Languages, LogOut } from 'lucide-vue-next'
 import type { Permission } from '@raseel/shared'
 
 const { t } = useI18n()
 useHead({ title: () => t('settings.title') })
 const auth = useAuthStore()
+const { locale, locales, setLocale } = useI18n()
+const otherLocale = computed(() => locales.value.find((l) => l.code !== locale.value))
+async function logout() {
+  await auth.logout()
+  await navigateTo('/login')
+}
 
 const tabs = computed(() =>
   (
@@ -40,19 +47,45 @@ const tabs = computed(() =>
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl px-4 py-6 md:px-8 md:py-10">
-    <h1 class="mb-5 text-2xl font-bold">{{ $t('settings.title') }}</h1>
-    <nav class="-mx-4 mb-6 flex gap-1 overflow-x-auto px-4 md:mx-0 md:px-0">
-      <NuxtLink
-        v-for="tab in tabs"
-        :key="tab.to"
-        :to="tab.to"
-        class="whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-        active-class="!bg-brand-700 !text-white"
+  <div class="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-10">
+    <div class="mb-6 flex items-center justify-between gap-3">
+      <h1 class="text-2xl font-bold">{{ $t('settings.title') }}</h1>
+      <!-- On phones the rail is replaced by a tab bar, so account actions live here. -->
+      <div class="flex items-center gap-1 md:hidden">
+        <button
+          v-if="otherLocale"
+          type="button"
+          class="btn-ghost min-h-9 text-[13px]"
+          @click="setLocale(otherLocale.code)"
+        >
+          <Languages class="size-4" :stroke-width="1.5" aria-hidden="true" />{{ otherLocale.name }}
+        </button>
+        <button type="button" class="btn-ghost min-h-9 text-[13px]" @click="logout">
+          <LogOut class="size-4 rtl:-scale-x-100" :stroke-width="1.5" aria-hidden="true" />{{
+            $t('nav.logout')
+          }}
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-6 lg:flex-row lg:gap-10">
+      <nav
+        :aria-label="$t('settings.title')"
+        class="-mx-4 flex shrink-0 gap-1 overflow-x-auto border-b border-slate-200 px-4 lg:mx-0 lg:w-52 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:border-0 lg:px-0"
       >
-        {{ $t(tab.label) }}
-      </NuxtLink>
-    </nav>
-    <NuxtPage />
+        <NuxtLink
+          v-for="tab in tabs"
+          :key="tab.to"
+          :to="tab.to"
+          class="-mb-px whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-sm text-slate-600 hover:text-slate-900 lg:mb-0 lg:rounded-lg lg:border-0 lg:py-2 lg:hover:bg-slate-100"
+          active-class="!border-slate-900 font-semibold !text-slate-900 lg:!bg-white lg:shadow-sm lg:ring-1 lg:ring-slate-200"
+        >
+          {{ $t(tab.label) }}
+        </NuxtLink>
+      </nav>
+      <div class="min-w-0 flex-1">
+        <NuxtPage />
+      </div>
+    </div>
   </div>
 </template>

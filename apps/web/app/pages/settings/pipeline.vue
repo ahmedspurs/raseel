@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronDown, ChevronUp, X } from 'lucide-vue-next'
 import type { PipelineInfo, StageInfo } from '~/types/sales'
 
 definePageMeta({
@@ -52,7 +53,7 @@ async function save() {
             :disabled="i === 0"
             @click="move(i, -1)"
           >
-            ▲
+            <ChevronUp class="size-4" :stroke-width="1.5" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -60,7 +61,7 @@ async function save() {
             :disabled="i === stages.length - 1"
             @click="move(i, 1)"
           >
-            ▼
+            <ChevronDown class="size-4" :stroke-width="1.5" aria-hidden="true" />
           </button>
         </div>
         <input v-model="s.name" class="input flex-1" required maxlength="40" dir="auto" />
@@ -75,7 +76,7 @@ async function save() {
           :disabled="stages.length === 1"
           @click="stages.splice(i, 1)"
         >
-          ✕
+          <X class="size-4" :stroke-width="1.5" aria-hidden="true" />
         </button>
       </li>
     </ul>

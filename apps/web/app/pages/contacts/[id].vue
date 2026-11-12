@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowLeft, ArrowRight } from 'lucide-vue-next'
 import type { ContactInfo, CustomFieldDef, TagInfo } from '~/types/crm'
 import type { ConversationSummary } from '~/types/inbox'
 import type { DealInfo, PipelineInfo } from '~/types/sales'
@@ -144,7 +145,8 @@ const stageName = (sid: string) => stages.value.find((s) => s.id === sid)?.name 
         to="/contacts"
         class="mb-3 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800"
       >
-        <span class="rtl:rotate-180">‹</span> {{ $t('contacts.title') }}
+        <ArrowRight class="size-4 ltr:-scale-x-100" :stroke-width="1.5" aria-hidden="true" />
+        {{ $t('contacts.title') }}
       </NuxtLink>
 
       <header class="card mb-6 flex flex-wrap items-center gap-4 p-5">
@@ -157,7 +159,7 @@ const stageName = (sid: string) => stages.value.find((s) => s.id === sid)?.name 
           <h1 class="truncate text-xl font-bold">
             {{ data.contact.displayName ?? `+${data.contact.waId}` }}
           </h1>
-          <p class="ltr text-sm text-slate-500">+{{ data.contact.waId }}</p>
+          <p class="ltr num text-sm text-slate-500">{{ formatPhone(data.contact.waId) }}</p>
           <p
             v-if="data.contact.waName && data.contact.waName !== data.contact.name"
             class="text-xs text-slate-500"
@@ -248,16 +250,18 @@ const stageName = (sid: string) => stages.value.find((s) => s.id === sid)?.name 
                   v-for="tg in data.tags"
                   :key="tg.id"
                   type="button"
-                  class="rounded-full border px-3 py-1 text-sm transition"
-                  :style="
+                  class="flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition"
+                  :class="
                     form.tagIds.includes(tg.id)
-                      ? { backgroundColor: tg.color, borderColor: tg.color, color: '#fff' }
-                      : { borderColor: tg.color, color: tg.color }
+                      ? 'border-slate-900 bg-slate-900 text-white'
+                      : 'border-slate-200 text-slate-700 hover:border-slate-400'
                   "
                   :aria-pressed="form.tagIds.includes(tg.id)"
                   @click="toggleTag(tg.id)"
                 >
-                  {{ tg.name }}
+                  <span class="dot" :style="{ backgroundColor: tg.color }" aria-hidden="true" />{{
+                    tg.name
+                  }}
                 </button>
                 <NuxtLink
                   v-if="auth.can('tags:manage')"
@@ -348,7 +352,12 @@ const stageName = (sid: string) => stages.value.find((s) => s.id === sid)?.name 
               </li>
             </ul>
             <NuxtLink to="/deals" class="mt-2 inline-block text-sm font-medium text-brand-700">
-              {{ $t('deals.title') }} ›
+              {{ $t('deals.title') }}
+              <ArrowLeft
+                class="inline size-4 align-[-3px] ltr:-scale-x-100"
+                :stroke-width="1.5"
+                aria-hidden="true"
+              />
             </NuxtLink>
           </section>
 

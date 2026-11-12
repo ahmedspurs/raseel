@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowRight } from 'lucide-vue-next'
 import type { CustomFieldDef, TemplateInfo } from '~/types/crm'
 import type { SegmentInfo } from '~/types/sales'
 
@@ -113,7 +114,12 @@ async function create() {
 <template>
   <div class="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-10">
     <NuxtLink to="/broadcasts" class="mb-3 inline-block text-sm text-slate-500"
-      >‹ {{ $t('broadcasts.title') }}</NuxtLink
+      ><ArrowRight
+        class="inline size-4 align-[-3px] ltr:-scale-x-100"
+        :stroke-width="1.5"
+        aria-hidden="true"
+      />
+      {{ $t('broadcasts.title') }}</NuxtLink
     >
     <h1 class="mb-5 text-2xl font-bold">{{ $t('broadcasts.new') }}</h1>
 

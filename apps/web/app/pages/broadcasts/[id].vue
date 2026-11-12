@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowRight } from 'lucide-vue-next'
 import type { BroadcastStats } from '~/types/sales'
 
 interface Detail {
@@ -68,7 +69,12 @@ async function cancel() {
 <template>
   <div v-if="data" class="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-10">
     <NuxtLink to="/broadcasts" class="mb-3 inline-block text-sm text-slate-500"
-      >‹ {{ $t('broadcasts.title') }}</NuxtLink
+      ><ArrowRight
+        class="inline size-4 align-[-3px] ltr:-scale-x-100"
+        :stroke-width="1.5"
+        aria-hidden="true"
+      />
+      {{ $t('broadcasts.title') }}</NuxtLink
     >
     <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
       <div>

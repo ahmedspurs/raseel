@@ -68,7 +68,10 @@ async function importCsv(e: Event) {
   const form = new FormData()
   form.append('file', file, file.name)
   try {
-    importResult.value = await api('/contacts/import', { method: 'POST', body: form })
+    importResult.value = await api<NonNullable<typeof importResult.value>>('/contacts/import', {
+      method: 'POST',
+      body: form,
+    })
     await load()
   } catch (err) {
     importError.value = toMessage(err)
@@ -238,26 +241,26 @@ async function addContact() {
                   <span class="block truncate font-medium">{{
                     c.displayName ?? `+${c.waId}`
                   }}</span>
-                  <span class="ltr block text-xs text-slate-500">+{{ c.waId }}</span>
+                  <span class="ltr num block text-xs text-slate-500">{{
+                    formatPhone(c.waId)
+                  }}</span>
                 </span>
               </div>
             </td>
             <td class="px-4 py-3 text-slate-600 dark:text-slate-400">{{ c.company ?? '—' }}</td>
             <td class="px-4 py-3">
               <span class="flex flex-wrap gap-1">
-                <span
-                  v-for="tg in c.tags"
-                  :key="tg.id"
-                  class="badge text-white"
-                  :style="{ backgroundColor: tg.color }"
-                  >{{ tg.name }}</span
+                <span v-for="tg in c.tags" :key="tg.id" class="badge"
+                  ><span class="dot" :style="{ backgroundColor: tg.color }" aria-hidden="true" />{{
+                    tg.name
+                  }}</span
                 >
               </span>
             </td>
             <td class="px-4 py-3">
-              <span v-if="c.optInMarketing" class="badge bg-emerald-100 text-emerald-800">{{
-                $t('contacts.optedIn')
-              }}</span>
+              <span v-if="c.optInMarketing" class="flex items-center gap-1.5 text-slate-700"
+                ><span class="dot bg-active" aria-hidden="true" />{{ $t('contacts.optedIn') }}</span
+              >
               <span v-else class="text-slate-400">—</span>
             </td>
             <td class="px-4 py-3 text-end text-xs text-slate-500">{{ shortDate(c.createdAt) }}</td>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next'
 import type { ContactInfo, CustomFieldDef, TemplateInfo } from '~/types/crm'
 
 const props = defineProps<{
@@ -148,7 +149,7 @@ async function send() {
           :aria-label="$t('common.cancel')"
           @click="emit('close')"
         >
-          ✕
+          <X class="size-4" :stroke-width="1.5" aria-hidden="true" />
         </button>
       </div>
 
