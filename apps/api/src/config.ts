@@ -16,6 +16,15 @@ const envSchema = z.object({
 
   /** Where downloaded WhatsApp media is stored. */
   MEDIA_DIR: z.string().default('./uploads'),
+  /** Largest file agents may upload, in megabytes (WhatsApp documents allow up to 100 MB). */
+  MEDIA_MAX_MB: z.coerce.number().int().positive().max(100).default(64),
+
+  /** Meta Graph API. Pinned so Meta changes cannot break a running install (SRS §7.6). */
+  WHATSAPP_GRAPH_URL: z.url().default('https://graph.facebook.com'),
+  WHATSAPP_API_VERSION: z
+    .string()
+    .regex(/^v\d+\.\d+$/)
+    .default('v26.0'),
 
   /**
    * 32-byte key (base64 or hex) used to encrypt secrets at rest (NFR-08).
