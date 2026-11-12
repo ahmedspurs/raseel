@@ -1,0 +1,116 @@
+{
+  "app": {
+    "name": "Raseel",
+    "tagline": "Your team's WhatsApp inbox"
+  },
+  "common": {
+    "save": "Save",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading…",
+    "next": "Next",
+    "back": "Back",
+    "copy": "Copy",
+    "copied": "Copied",
+    "optional": "optional",
+    "language": "Language",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "never": "Never"
+  },
+  "roles": {
+    "OWNER": "Owner",
+    "ADMIN": "Admin",
+    "AGENT": "Agent",
+    "VIEWER": "Viewer"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Cannot reach the server. Check your connection.",
+    "invalid_credentials": "Incorrect email or password.",
+    "invalid_totp": "The verification code is not correct.",
+    "totp_required": "Enter the 6-digit code from your authenticator app.",
+    "already_setup": "This workspace is already set up. Please sign in.",
+    "email_taken": "A user with this email already exists.",
+    "invalid_invitation": "This invitation link is invalid or has expired.",
+    "cannot_assign_role": "You cannot assign this role.",
+    "invalid_password": "Your current password is not correct.",
+    "name_taken": "This name is already used.",
+    "validation_error": "Please check the highlighted fields.",
+    "rate_limited": "Too many attempts. Please wait a few minutes.",
+    "forbidden": "You do not have permission to do this."
+  },
+  "setup": {
+    "title": "Set up your workspace",
+    "subtitle": "Two quick steps and your team inbox is ready.",
+    "stepBusiness": "Business",
+    "stepOwner": "Owner account",
+    "businessName": "Business name",
+    "businessNamePlaceholder": "e.g. Al Noor Clinic",
+    "defaultLanguage": "Default language",
+    "timeZone": "Time zone",
+    "ownerName": "Your name",
+    "passwordHint": "At least 10 characters.",
+    "finish": "Create workspace"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Welcome back to {name}",
+    "submit": "Sign in",
+    "totp": "Verification code"
+  },
+  "invite": {
+    "title": "Join your team",
+    "subtitle": "You were invited as {role}. Choose a password to continue.",
+    "submit": "Join"
+  },
+  "nav": {
+    "inbox": "Inbox",
+    "contacts": "Contacts",
+    "settings": "Settings",
+    "logout": "Sign out"
+  },
+  "inbox": {
+    "emptyTitle": "Your inbox is ready",
+    "emptyBody": "Connect your WhatsApp number in Settings to start receiving messages."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "My profile",
+    "business": "Business",
+    "users": "Users",
+    "teams": "Teams",
+    "security": "Security",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "passwordChanged": "Password changed. Other devices were signed out.",
+    "twoFactor": "Two-factor authentication",
+    "twoFactorOff": "Add a second step to your sign-in with an authenticator app.",
+    "twoFactorOn": "Two-factor authentication is on.",
+    "twoFactorEnable": "Turn on",
+    "twoFactorDisable": "Turn off",
+    "twoFactorScan": "Add this key to your authenticator app (Google Authenticator, 1Password, Authy…), then enter the 6-digit code.",
+    "twoFactorKey": "Setup key",
+    "invite": "Invite user",
+    "inviteSent": "Invitation email sent.",
+    "inviteLink": "Share this link with the new user. It expires in 7 days.",
+    "pendingInvites": "Pending invitations",
+    "lastLogin": "Last sign-in",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "newTeam": "New team",
+    "teamName": "Team name",
+    "members": "Members",
+    "noTeams": "No teams yet. Teams let you route conversations to a group of agents."
+  }
+}

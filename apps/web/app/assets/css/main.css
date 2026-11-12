@@ -1,0 +1,70 @@
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource/ibm-plex-sans-arabic/700.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+  /* Keep phone numbers, emails and codes left-to-right inside Arabic text. */
+  .ltr {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  /* In Arabic layouts, keep isolated LTR text (not form fields) aligned with the page. */
+  [dir='rtl'] .ltr:not(input, select, textarea, code) {
+    text-align: right;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+}
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300;
+}
+@utility input {
+  @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm
+    shadow-xs outline-none transition placeholder:text-slate-400
+    focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15
+    disabled:cursor-not-allowed disabled:bg-slate-100
+    dark:border-slate-700 dark:bg-slate-950 dark:focus:border-brand-500;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+    transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primary {
+  @apply btn bg-brand-700 text-white hover:bg-brand-800 focus-visible:ring-brand-600/30;
+}
+@utility btn-secondary {
+  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50
+    focus-visible:ring-slate-400/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200
+    dark:hover:bg-slate-800;
+}
+@utility btn-danger {
+  @apply btn bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30;
+}
+@utility badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
