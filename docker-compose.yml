@@ -1,0 +1,123 @@
+# Raseel — self-hosted WhatsApp team inbox.
+# Sized for a 1 vCPU / 4 GB VPS (Hostinger KVM 1) with up to ~10 agents.
+#
+#   cp .env.example .env   # or run scripts/install.sh
+#   docker compose up -d
+
+name: raseel
+
+x-api-env: &api-env
+  NODE_ENV: production
+  APP_URL: https://${DOMAIN:?Set DOMAIN in .env}
+  DATABASE_URL: postgresql://raseel:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/raseel
+  REDIS_URL: redis://redis:6379/0
+  ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Set ENCRYPTION_KEY in .env}
+  SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  SMTP_URL: ${SMTP_URL:-}
+  MAIL_FROM: ${MAIL_FROM:-Raseel <no-reply@localhost>}
+  MEDIA_DIR: /data/media
+
+services:
+  caddy:
+    image: ghcr.io/ahmedspurs/raseel-web:${RASEEL_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    image: ghcr.io/ahmedspurs/raseel-api:${RASEEL_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    command: ['api']
+    restart: unless-stopped
+    environment: *api-env
+    volumes:
+      - media:/data/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:4000/health']
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  worker:
+    image: ghcr.io/ahmedspurs/raseel-api:${RASEEL_VERSION:-latest}
+    command: ['worker']
+    restart: unless-stopped
+    environment: *api-env
+    volumes:
+      - media:/data/media
+    depends_on:
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: raseel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: raseel
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - max_connections=50
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U raseel -d raseel']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Append-only file so queued webhooks and sends survive a restart (NFR-04).
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres:
+  redis:
+  media:
+  caddy_data:
+  caddy_config:
