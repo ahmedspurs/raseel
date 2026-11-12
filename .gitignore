@@ -13,4 +13,4 @@ coverage/
 /data/
 /backups/
 apps/api/uploads/
-src/generated/
+apps/api/src/generated/
