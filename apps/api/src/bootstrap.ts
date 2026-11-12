@@ -9,6 +9,7 @@ import { AssignmentService } from './services/assignment.js'
 import { AuditService } from './services/audit.js'
 import { AuthService } from './services/auth.js'
 import { AutomationService } from './services/automation.js'
+import { BroadcastService } from './services/broadcasts.js'
 import { EventBus } from './services/events.js'
 import { InboundService } from './services/inbound.js'
 import { Mailer } from './services/mailer.js'
@@ -33,6 +34,7 @@ export function createContext(config: Config = loadConfig()): AppContext {
   const outbound = new OutboundService({ db, queues, events, whatsapp, media })
   const automation = new AutomationService({ db, redis, settings, events, audit, outbound })
   const log = createLogger(config)
+  const templates = new TemplateService({ db, queues, events, whatsapp })
   const messaging = { db, queues, events, whatsapp, media, assignment, automation, log }
 
   return {
@@ -51,8 +53,9 @@ export function createContext(config: Config = loadConfig()): AppContext {
     inbound: new InboundService(messaging),
     outbound,
     assignment,
-    templates: new TemplateService(messaging),
+    templates,
     automation,
+    broadcasts: new BroadcastService({ db, queues, templates, outbound, audit }),
   }
 }
 

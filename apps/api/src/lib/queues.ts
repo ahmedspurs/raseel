@@ -6,6 +6,7 @@ export const QueueName = {
   Send: 'send',
   Media: 'media',
   Maintenance: 'maintenance',
+  Broadcast: 'broadcast',
 } as const
 
 export interface WebhookJob {
@@ -17,6 +18,8 @@ export interface SendJob {
 export interface MediaJob {
   messageId: string
 }
+export type BroadcastJob =
+  { kind: 'start'; broadcastId: string } | { kind: 'send'; recipientId: string }
 
 /** Retries with exponential back-off: ~2s, 4s, 8s … (NFR-04, NFR-05). */
 const RETRY: JobsOptions = {
@@ -30,6 +33,7 @@ export interface Queues {
   webhook: Queue<WebhookJob>
   send: Queue<SendJob>
   media: Queue<MediaJob>
+  broadcast: Queue<BroadcastJob>
   close(): Promise<void>
 }
 
@@ -46,12 +50,17 @@ export function createQueues(connection: Redis): Queues {
     connection,
     defaultJobOptions: { ...RETRY, attempts: 5 },
   })
+  const broadcast = new Queue<BroadcastJob>(QueueName.Broadcast, {
+    connection,
+    defaultJobOptions: { ...RETRY, attempts: 5 },
+  })
   return {
     webhook,
     send,
     media,
+    broadcast,
     async close() {
-      await Promise.all([webhook.close(), send.close(), media.close()])
+      await Promise.all([webhook.close(), send.close(), media.close(), broadcast.close()])
     },
   }
 }

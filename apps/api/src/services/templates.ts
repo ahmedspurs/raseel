@@ -198,7 +198,17 @@ export class TemplateService {
    * FR-41: sends an approved template to a contact. Works outside the 24-hour window,
    * so it also starts conversations with customers who have not written yet.
    */
-  async send(contactId: string, userId: string, input: TemplateSendInput): Promise<Message> {
+  async send(
+    contactId: string,
+    userId: string | null,
+    input: TemplateSendInput,
+    /**
+     * Broadcasts send through their own rate-limited queue (enqueue: false) and
+     * must not reopen conversations the team already closed (reopen: false).
+     */
+    opts: { enqueue?: boolean; reopen?: boolean } = {},
+  ): Promise<Message> {
+    const { enqueue = true, reopen = true } = opts
     const { db, queues, events } = this.deps
     await this.connection()
     const [template, contact] = await Promise.all([
@@ -279,10 +289,12 @@ export class TemplateService {
       data: {
         lastMessageAt: message.createdAt,
         lastMessagePreview: `📝 ${rendered.slice(0, 120)}`,
-        ...(conversation.status === 'CLOSED' ? { status: 'OPEN', closedAt: null } : {}),
+        ...(reopen && conversation.status === 'CLOSED' ? { status: 'OPEN', closedAt: null } : {}),
       },
     })
-    await queues.send.add('send', { messageId: message.id }, { jobId: jobId('send', message.id) })
+    if (enqueue) {
+      await queues.send.add('send', { messageId: message.id }, { jobId: jobId('send', message.id) })
+    }
     await events.publish({
       type: 'message.created',
       conversationId: conversation.id,

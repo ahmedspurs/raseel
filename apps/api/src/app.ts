@@ -11,6 +11,7 @@ import { authPlugin } from './plugins/auth.js'
 import { attachRealtime } from './realtime.js'
 import { authRoutes } from './routes/auth.js'
 import { automationRoutes } from './routes/automation.js'
+import { broadcastRoutes } from './routes/broadcasts.js'
 import { contactRoutes } from './routes/contacts.js'
 import { conversationRoutes, mediaRoutes } from './routes/conversations.js'
 import { healthRoutes } from './routes/health.js'
@@ -92,6 +93,7 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(contactRoutes, { prefix: '/api' })
   await app.register(templateRoutes, { prefix: '/api' })
   await app.register(automationRoutes, { prefix: '/api/automation' })
+  await app.register(broadcastRoutes, { prefix: '/api' })
   await app.register(webhookRoutes, { prefix: '/webhooks' })
 
   await attachRealtime(app)

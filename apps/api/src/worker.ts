@@ -3,7 +3,13 @@ import { closeContext, createContext } from './bootstrap.js'
 import { runMaintenance } from './jobs/maintenance.js'
 import { runSweep } from './jobs/sweep.js'
 import { createLogger } from './lib/logger.js'
-import { type MediaJob, QueueName, type SendJob, type WebhookJob } from './lib/queues.js'
+import {
+  type BroadcastJob,
+  type MediaJob,
+  QueueName,
+  type SendJob,
+  type WebhookJob,
+} from './lib/queues.js'
 import { SendFailure } from './services/outbound.js'
 import { WhatsAppApiError } from './whatsapp/errors.js'
 
@@ -65,6 +71,27 @@ const workers = [
       }
     },
     { connection, concurrency: 2 },
+  ),
+
+  // FR-42: broadcasts are throttled to stay within the number's messaging tier.
+  new Worker<BroadcastJob>(
+    QueueName.Broadcast,
+    async (job) => {
+      if (job.data.kind === 'start') return ctx.broadcasts.start(job.data.broadcastId)
+      try {
+        return await ctx.broadcasts.sendOne(job.data.recipientId, {
+          finalAttempt: isFinalAttempt(job),
+        })
+      } catch (err) {
+        if (err instanceof SendFailure && err.permanent) throw new UnrecoverableError(err.message)
+        throw err
+      }
+    },
+    {
+      connection,
+      concurrency: 4,
+      limiter: { max: ctx.config.BROADCAST_RATE_PER_SECOND, duration: 1000 },
+    },
   ),
 
   new Worker(

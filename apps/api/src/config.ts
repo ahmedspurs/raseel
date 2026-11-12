@@ -22,6 +22,9 @@ const envSchema = z.object({
   FFMPEG_PATH: z.string().default('ffmpeg'),
 
   /** Meta Graph API. Pinned so Meta changes cannot break a running install (SRS §7.6). */
+  /** Broadcast sending speed; keep within your number's messaging tier (FR-42). */
+  BROADCAST_RATE_PER_SECOND: z.coerce.number().int().min(1).max(80).default(20),
+
   WHATSAPP_GRAPH_URL: z.url().default('https://graph.facebook.com'),
   WHATSAPP_API_VERSION: z
     .string()

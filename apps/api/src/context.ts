@@ -7,6 +7,7 @@ import type { AssignmentService } from './services/assignment.js'
 import type { AuditService } from './services/audit.js'
 import type { AuthService } from './services/auth.js'
 import type { AutomationService } from './services/automation.js'
+import type { BroadcastService } from './services/broadcasts.js'
 import type { EventBus } from './services/events.js'
 import type { InboundService } from './services/inbound.js'
 import type { Mailer } from './services/mailer.js'
@@ -35,6 +36,7 @@ export interface AppContext {
   assignment: AssignmentService
   templates: TemplateService
   automation: AutomationService
+  broadcasts: BroadcastService
 }
 
 declare module 'fastify' {

@@ -13,6 +13,7 @@ export const PERMISSIONS = [
   'teams:manage',
   'templates:manage',
   'automations:manage',
+  'broadcasts:manage',
   'tags:manage',
   'reports:view',
   'conversations:view',
@@ -43,6 +44,7 @@ const ADMIN: readonly Permission[] = [
   'teams:manage',
   'templates:manage',
   'automations:manage',
+  'broadcasts:manage',
   'tags:manage',
   'audit:view',
 ]
