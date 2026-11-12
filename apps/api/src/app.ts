@@ -88,7 +88,7 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(noteRoutes, { prefix: '/api' })
   await app.register(webhookRoutes, { prefix: '/webhooks' })
 
-  attachRealtime(app)
+  await attachRealtime(app)
 
   return app
 }

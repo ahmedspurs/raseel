@@ -32,7 +32,7 @@ const conversationRoom = (id: string) => `conversation:${id}`
  * Events come from Redis, so changes made by the worker reach browsers too.
  * Presence is kept in memory; Raseel runs a single API process per install.
  */
-export function attachRealtime(app: FastifyInstance): Server {
+export async function attachRealtime(app: FastifyInstance): Promise<Server> {
   const { db, redis, auth, config } = app.ctx
   const io = new Server(app.server, {
     path: '/socket.io',
@@ -119,7 +119,8 @@ export function attachRealtime(app: FastifyInstance): Server {
 
   // Relay domain events to browsers with the data they need to render.
   const subscriber = redis.duplicate()
-  void subscriber.subscribe(EVENTS_CHANNEL)
+  // Wait for the subscription so no event published after startup is missed.
+  await subscriber.subscribe(EVENTS_CHANNEL)
   subscriber.on('message', async (_channel, raw) => {
     let event: RealtimeEvent
     try {
