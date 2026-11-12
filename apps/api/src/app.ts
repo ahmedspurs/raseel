@@ -1,6 +1,7 @@
 import cookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
+import multipart from '@fastify/multipart'
 import rateLimit from '@fastify/rate-limit'
 import sensible from '@fastify/sensible'
 import Fastify, { type FastifyServerOptions } from 'fastify'
@@ -8,11 +9,14 @@ import { ZodError } from 'zod'
 import type { AppContext } from './context.js'
 import { authPlugin } from './plugins/auth.js'
 import { authRoutes } from './routes/auth.js'
+import { conversationRoutes, mediaRoutes } from './routes/conversations.js'
 import { healthRoutes } from './routes/health.js'
 import { settingsRoutes } from './routes/settings.js'
 import { setupRoutes } from './routes/setup.js'
 import { teamRoutes } from './routes/teams.js'
 import { userRoutes } from './routes/users.js'
+import { webhookRoutes } from './routes/webhooks.js'
+import { whatsappRoutes } from './routes/whatsapp.js'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
@@ -34,6 +38,9 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(helmet, { contentSecurityPolicy: false })
   await app.register(cors, { origin: ctx.config.APP_URL, credentials: true })
   await app.register(cookie, { secret: ctx.config.SESSION_SECRET })
+  await app.register(multipart, {
+    limits: { files: 1, fields: 10, fileSize: ctx.config.MEDIA_MAX_MB * 1024 * 1024 },
+  })
   await app.register(rateLimit, {
     max: 300,
     timeWindow: '1 minute',
@@ -73,6 +80,10 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(userRoutes, { prefix: '/api/users' })
   await app.register(teamRoutes, { prefix: '/api/teams' })
   await app.register(settingsRoutes, { prefix: '/api/settings' })
+  await app.register(whatsappRoutes, { prefix: '/api/whatsapp' })
+  await app.register(conversationRoutes, { prefix: '/api/conversations' })
+  await app.register(mediaRoutes, { prefix: '/api/media' })
+  await app.register(webhookRoutes, { prefix: '/webhooks' })
 
   return app
 }
