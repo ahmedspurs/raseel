@@ -8,6 +8,15 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Realtime inbox over Socket.io: new messages, delivery ticks, assignments and notes appear instantly
+- Inbox views (Mine, Unassigned, My teams, All, Closed) with agent, team, status and date filters
+- Assignment to agents and teams, assign-to-me, optional round-robin auto-assignment
+- Open, Pending and Closed statuses with audit log entries
+- Internal notes with @mentions, mention notifications and unread count
+- Quick replies inserted with "/" in Arabic or English
+- Collision warning when a colleague is viewing or typing in the same conversation
+- Voice notes recorded in the browser and converted to WhatsApp format
+- Read receipts sent to customers when an agent opens the conversation
 - WhatsApp connection: Phone Number ID, WABA ID, token and app secret verified against the Cloud API, with webhook URL, verify token and first-delivery check
 - Signed webhook receiver that stores events before acknowledging and processes them in a queue
 - Inbound text, images, video, voice notes, documents, stickers, locations, contacts, reactions and button replies, with automatic contacts and conversation reopening
