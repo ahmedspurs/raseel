@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Plus, UserRound, X } from 'lucide-vue-next'
 import type { TaskInfo } from '~/types/sales'
 
 const props = defineProps<{
@@ -15,6 +16,7 @@ const directory = useDirectoryStore()
 const { locale } = useI18n()
 
 const showDone = ref(false)
+const formOpen = ref(false)
 const tasks = ref<TaskInfo[]>([])
 const error = ref<string | null>(null)
 
@@ -75,7 +77,19 @@ async function remove(id: string) {
 
 <template>
   <div class="space-y-3">
-    <form v-if="auth.can('deals:edit')" class="flex flex-wrap gap-2" @submit.prevent="add">
+    <button
+      v-if="compact && auth.can('deals:edit') && !formOpen"
+      type="button"
+      class="flex items-center gap-1.5 text-[13px] font-medium text-slate-700 hover:text-slate-900"
+      @click="formOpen = true"
+    >
+      <Plus class="size-4" :stroke-width="1.5" aria-hidden="true" />{{ $t('tasks.add') }}
+    </button>
+    <form
+      v-if="auth.can('deals:edit') && (!compact || formOpen)"
+      class="flex flex-wrap gap-2"
+      @submit.prevent="add"
+    >
       <input
         v-model="draft.title"
         class="input min-w-40 flex-1"
@@ -130,7 +144,11 @@ async function remove(id: string) {
               {{ overdue(tk) ? `${$t('tasks.overdue')} · ` : ''
               }}{{ dateFmt.format(new Date(tk.dueAt)) }}
             </span>
-            <span v-if="!compact && tk.assignee">👤 {{ tk.assignee.name }}</span>
+            <span v-if="!compact && tk.assignee" class="flex items-center gap-1"
+              ><UserRound class="size-3.5" :stroke-width="1.5" aria-hidden="true" />{{
+                tk.assignee.name
+              }}</span
+            >
             <NuxtLink
               v-if="!compact && tk.contact"
               :to="`/contacts/${tk.contact.id}`"
@@ -147,7 +165,7 @@ async function remove(id: string) {
           class="text-xs text-rose-600"
           @click="remove(tk.id)"
         >
-          ✕
+          <X class="size-4" :stroke-width="1.5" aria-hidden="true" />
         </button>
       </li>
     </ul>

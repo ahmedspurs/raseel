@@ -48,3 +48,25 @@ export function initials(name: string | null | undefined): string {
     .join('')
     .toUpperCase()
 }
+
+/** Country codes common for Raseel's users, longest first so 249 wins over 2. */
+const COUNTRY_CODES = ['966', '971', '965', '974', '973', '968', '962', '249', '20', '44', '1']
+
+/**
+ * Groups an international number for reading, e.g. +966 51 234 5678,
+ * +971 50 111 2233, +1 415 555 0100. Unknown codes fall back to +digits.
+ */
+export function formatPhone(waId: string | null | undefined): string {
+  const d = (waId ?? '').replace(/\D/g, '')
+  if (!d) return ''
+  const cc = COUNTRY_CODES.find((c) => d.startsWith(c) && d.length - c.length >= 7)
+  if (!cc) return `+${d}`
+  const rest = d.slice(cc.length)
+  const groups =
+    rest.length === 9
+      ? [rest.slice(0, 2), rest.slice(2, 5), rest.slice(5)]
+      : rest.length === 10
+        ? [rest.slice(0, 3), rest.slice(3, 6), rest.slice(6)]
+        : (rest.match(/.{1,3}/g) ?? [rest])
+  return `+${cc} ${groups.join(' ')}`
+}

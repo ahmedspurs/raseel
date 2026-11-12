@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SlidersHorizontal } from 'lucide-vue-next'
 import type { InboxView } from '@raseel/shared'
 import type { ConversationSummary } from '~/types/inbox'
 
@@ -11,6 +12,11 @@ const auth = useAuthStore()
 const realtime = useRealtime()
 const route = useRoute()
 const { shortDate } = useFormat()
+const statusDot: Record<string, string> = {
+  OPEN: 'bg-active',
+  PENDING: 'bg-warn',
+  CLOSED: 'border border-slate-400',
+}
 
 const activeId = computed(() => (route.params.id as string | undefined) ?? null)
 const views: InboxView[] = ['mine', 'unassigned', 'team', 'all', 'closed']
@@ -42,41 +48,45 @@ onBeforeUnmount(() => clearInterval(fallback))
 <template>
   <div class="flex h-[calc(100dvh-4.5rem)] md:h-dvh">
     <section
-      class="w-full shrink-0 flex-col border-e border-slate-200 bg-white md:flex md:w-80 lg:w-96 dark:border-slate-800 dark:bg-slate-900"
+      class="w-full shrink-0 flex-col border-e border-slate-200 bg-white md:flex md:w-[22rem] lg:w-96"
       :class="activeId ? 'hidden' : 'flex'"
     >
-      <header class="space-y-3 border-b border-slate-200 p-4 dark:border-slate-800">
+      <header class="space-y-3 px-5 pb-3 pt-5">
         <div class="flex items-center justify-between gap-2">
-          <h1 class="text-lg font-bold">{{ $t('nav.inbox') }}</h1>
-          <div class="flex items-center gap-1">
+          <h1 class="text-xl font-bold">{{ $t('nav.inbox') }}</h1>
+          <div class="flex items-center gap-3">
             <span
               v-if="!realtime.connected.value"
-              class="badge bg-amber-100 text-amber-800"
-              :title="$t('inbox.reconnecting')"
+              class="flex items-center gap-1.5 text-xs text-slate-500"
+              role="status"
             >
-              {{ $t('inbox.reconnecting') }}
+              <span class="dot animate-pulse bg-warn" aria-hidden="true" />{{
+                $t('inbox.reconnecting')
+              }}
+            </span>
+            <span
+              v-else-if="inbox.connected !== null"
+              class="flex items-center gap-1.5 text-xs text-slate-600"
+            >
+              <span
+                class="dot"
+                :class="inbox.connected ? 'bg-active' : 'bg-slate-400'"
+                aria-hidden="true"
+              />{{ inbox.connected ? $t('inbox.whatsappConnected') : $t('inbox.whatsappOff') }}
             </span>
             <button
               type="button"
-              class="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-              :class="{ 'bg-slate-100 dark:bg-slate-800': showFilters }"
+              class="relative grid size-9 place-items-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              :class="{ 'bg-slate-100 text-slate-900': showFilters }"
+              :title="$t('inbox.filters.title')"
               :aria-label="$t('inbox.filters.title')"
               :aria-expanded="showFilters"
               @click="showFilters = !showFilters"
             >
-              <svg
-                viewBox="0 0 24 24"
-                class="size-5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-              >
-                <path d="M4 6h16M7 12h10M10 18h4" />
-              </svg>
+              <SlidersHorizontal class="size-[18px]" :stroke-width="1.5" aria-hidden="true" />
               <span
                 v-if="inbox.activeFilterCount"
-                class="absolute -end-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-brand-600 text-[10px] font-bold text-white"
+                class="num absolute end-1 top-1 grid size-4 place-items-center rounded-full bg-slate-900 text-[10px] text-white"
               >
                 {{ inbox.activeFilterCount }}
               </span>
@@ -86,42 +96,42 @@ onBeforeUnmount(() => clearInterval(fallback))
 
         <GlobalSearch />
 
-        <nav class="-mx-1 flex gap-1 overflow-x-auto px-1" :aria-label="$t('nav.inbox')">
+        <nav class="flex gap-0.5 rounded-[9px] bg-slate-100 p-[3px]" :aria-label="$t('nav.inbox')">
           <button
             v-for="v in views"
             :key="v"
             type="button"
-            class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium whitespace-nowrap"
+            class="flex flex-1 items-center justify-center gap-1 rounded-[7px] px-1.5 py-1.5 text-[13px] whitespace-nowrap"
             :class="
               inbox.view === v
-                ? 'bg-brand-700 text-white'
-                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                ? 'bg-white font-semibold text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             "
+            :aria-pressed="inbox.view === v"
             @click="inbox.view = v"
           >
             {{ $t(`inbox.views.${v}`) }}
-            <span
-              v-if="v !== 'closed' && inbox.counts[v]"
-              class="rounded-full px-1.5 text-xs"
-              :class="inbox.view === v ? 'bg-white/20' : 'bg-slate-200 dark:bg-slate-700'"
-            >
+            <span v-if="v !== 'closed' && inbox.counts[v]" class="num text-[11px] text-slate-500">
               {{ inbox.counts[v] }}
             </span>
           </button>
         </nav>
 
-        <div v-if="showFilters" class="grid grid-cols-2 gap-2 text-sm">
+        <div
+          v-if="showFilters"
+          class="grid grid-cols-2 gap-x-3 gap-y-2.5 border-t border-slate-200 pt-3"
+        >
           <label v-if="inbox.view !== 'closed'" class="col-span-2">
-            <span class="label text-xs">{{ $t('inbox.filters.status') }}</span>
-            <select v-model="inbox.filters.status" class="input py-1.5">
+            <span class="label">{{ $t('inbox.filters.status') }}</span>
+            <select v-model="inbox.filters.status" class="input">
               <option value="">{{ $t('inbox.filters.any') }}</option>
               <option value="OPEN">{{ $t('inbox.filters.OPEN') }}</option>
               <option value="PENDING">{{ $t('inbox.filters.PENDING') }}</option>
             </select>
           </label>
           <label>
-            <span class="label text-xs">{{ $t('inbox.filters.agent') }}</span>
-            <select v-model="inbox.filters.assigneeId" class="input py-1.5">
+            <span class="label">{{ $t('inbox.filters.agent') }}</span>
+            <select v-model="inbox.filters.assigneeId" class="input">
               <option value="">{{ $t('inbox.filters.any') }}</option>
               <option v-for="u in directory.assignable" :key="u.id" :value="u.id">
                 {{ u.name }}
@@ -129,8 +139,8 @@ onBeforeUnmount(() => clearInterval(fallback))
             </select>
           </label>
           <label>
-            <span class="label text-xs">{{ $t('inbox.filters.team') }}</span>
-            <select v-model="inbox.filters.teamId" class="input py-1.5">
+            <span class="label">{{ $t('inbox.filters.team') }}</span>
+            <select v-model="inbox.filters.teamId" class="input">
               <option value="">{{ $t('inbox.filters.any') }}</option>
               <option v-for="tm in directory.teams" :key="tm.id" :value="tm.id">
                 {{ tm.name }}
@@ -138,24 +148,24 @@ onBeforeUnmount(() => clearInterval(fallback))
             </select>
           </label>
           <label class="col-span-2">
-            <span class="label text-xs">{{ $t('inbox.filters.tag') }}</span>
-            <select v-model="inbox.filters.tagId" class="input py-1.5">
+            <span class="label">{{ $t('inbox.filters.tag') }}</span>
+            <select v-model="inbox.filters.tagId" class="input">
               <option value="">{{ $t('inbox.filters.any') }}</option>
               <option v-for="tg in tags" :key="tg.id" :value="tg.id">{{ tg.name }}</option>
             </select>
           </label>
           <label>
-            <span class="label text-xs">{{ $t('inbox.filters.from') }}</span>
-            <input v-model="inbox.filters.from" type="date" class="input ltr py-1.5" />
+            <span class="label">{{ $t('inbox.filters.from') }}</span>
+            <input v-model="inbox.filters.from" type="date" class="input ltr" />
           </label>
           <label>
-            <span class="label text-xs">{{ $t('inbox.filters.to') }}</span>
-            <input v-model="inbox.filters.to" type="date" class="input ltr py-1.5" />
+            <span class="label">{{ $t('inbox.filters.to') }}</span>
+            <input v-model="inbox.filters.to" type="date" class="input ltr" />
           </label>
           <button
             v-if="inbox.activeFilterCount"
             type="button"
-            class="col-span-2 text-start text-sm font-medium text-brand-700"
+            class="btn-ghost col-span-2 justify-start px-0"
             @click="inbox.clearFilters()"
           >
             {{ $t('inbox.filters.clear') }}
@@ -164,69 +174,87 @@ onBeforeUnmount(() => clearInterval(fallback))
       </header>
 
       <div
-        v-if="inbox.connected === false"
-        class="m-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100"
+        v-if="inbox.connected === false && auth.can('whatsapp:manage')"
+        class="mx-5 mb-3 flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
       >
-        {{ $t('inbox.notConnected') }}
+        <span class="text-slate-600">{{ $t('inbox.notConnected') }}</span>
         <NuxtLink
-          v-if="auth.can('whatsapp:manage')"
           to="/settings/whatsapp"
-          class="mt-1 block font-semibold underline"
+          class="shrink-0 font-semibold text-slate-900 underline-offset-4 hover:underline"
         >
           {{ $t('inbox.connectNow') }}
         </NuxtLink>
       </div>
 
-      <ul class="flex-1 overflow-y-auto">
+      <ul class="flex-1 overflow-y-auto border-t border-slate-200">
         <li
           v-if="inbox.loaded && !inbox.conversations.length"
-          class="p-6 text-center text-sm text-slate-500"
+          class="px-5 py-10 text-sm text-slate-500"
         >
-          {{ $t('inbox.noConversations') }}
+          {{
+            inbox.view === 'all' && !inbox.activeFilterCount
+              ? $t('inbox.noConversations')
+              : $t('inbox.emptyView')
+          }}
         </li>
         <li v-for="c in inbox.conversations" :key="c.id">
           <NuxtLink
             :to="`/inbox/${c.id}`"
-            class="flex gap-3 border-b border-slate-100 px-4 py-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/60"
-            :class="{ 'bg-brand-50 dark:bg-brand-900/30': c.id === activeId }"
+            class="flex gap-3 border-b border-slate-100 border-s-[3px] px-5 py-3.5"
+            :class="
+              c.id === activeId
+                ? 'border-s-slate-900 bg-slate-100'
+                : 'border-s-transparent hover:bg-slate-50'
+            "
           >
             <span
-              class="grid size-10 shrink-0 place-items-center rounded-full bg-slate-200 text-sm font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-100"
+              class="grid size-10 shrink-0 place-items-center rounded-full text-[13px] font-semibold"
+              :class="c.unreadCount ? 'bg-brand-100 text-raseel' : 'bg-slate-100 text-slate-600'"
             >
               {{ initials(c.contact.name) }}
             </span>
-            <span class="min-w-0 flex-1">
+            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
               <span class="flex items-baseline justify-between gap-2">
-                <span class="truncate font-medium" :class="{ 'font-bold': c.unreadCount }">
+                <span
+                  class="truncate text-[15px]"
+                  :class="c.unreadCount ? 'font-bold' : 'font-semibold'"
+                >
                   {{ c.contact.name ?? `+${c.contact.waId}` }}
                 </span>
-                <span class="shrink-0 text-xs text-slate-500">{{
-                  shortDate(c.lastMessageAt)
-                }}</span>
+                <span
+                  class="num shrink-0 text-xs"
+                  :class="c.unreadCount ? 'font-medium text-slate-900' : 'text-slate-500'"
+                >
+                  {{ shortDate(c.lastMessageAt) }}
+                </span>
               </span>
-              <span class="mt-0.5 flex items-center justify-between gap-2">
-                <span class="truncate text-sm text-slate-600 dark:text-slate-400" dir="auto">
-                  {{ c.lastMessagePreview }}
+              <span class="flex items-center justify-between gap-2">
+                <span
+                  class="truncate text-sm"
+                  :class="c.unreadCount ? 'text-slate-900' : 'text-slate-600'"
+                >
+                  <PreviewText :text="c.lastMessagePreview" />
                 </span>
                 <span
                   v-if="c.unreadCount"
-                  class="grid min-w-5 shrink-0 place-items-center rounded-full bg-brand-600 px-1.5 text-xs font-bold text-white"
+                  class="num grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-slate-900 px-1.5 text-[11px] font-semibold text-white"
                 >
                   {{ c.unreadCount }}
                 </span>
               </span>
-              <span class="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
-                <span
-                  v-if="c.status === 'PENDING'"
-                  class="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800"
-                >
-                  {{ $t('inbox.statusLabel.PENDING') }}
+              <span class="flex min-w-0 items-center gap-2.5 text-xs text-slate-500">
+                <span class="flex items-center gap-1.5">
+                  <span
+                    class="dot box-border size-1.5"
+                    :class="statusDot[c.status]"
+                    aria-hidden="true"
+                  />
+                  {{ $t(`inbox.statusLabel.${c.status}`) }}
                 </span>
-                <span v-if="c.assigneeId" class="truncate">
-                  👤 {{ directory.userName(c.assigneeId) }}
-                </span>
-                <span v-else class="italic">{{ $t('inbox.unassigned') }}</span>
-                <span v-if="c.teamId" class="truncate">· {{ directory.teamName(c.teamId) }}</span>
+                <span class="truncate">{{
+                  c.assigneeId ? directory.userName(c.assigneeId) : $t('inbox.unassigned')
+                }}</span>
+                <span v-if="c.teamId" class="truncate">{{ directory.teamName(c.teamId) }}</span>
               </span>
             </span>
           </NuxtLink>

@@ -21,6 +21,23 @@ const loadingOlder = ref(false)
 const notFound = ref(false)
 const scroller = ref<HTMLElement | null>(null)
 const showTemplate = ref(false)
+/** Contact details beside the thread on wide screens; remembered per browser. */
+const panelOpen = ref(true)
+onMounted(() => {
+  try {
+    panelOpen.value = localStorage.getItem('raseel.contactPanel') !== 'closed'
+  } catch {
+    // Storage may be unavailable (private mode); keep the default.
+  }
+})
+function togglePanel() {
+  panelOpen.value = !panelOpen.value
+  try {
+    localStorage.setItem('raseel.contactPanel', panelOpen.value ? 'open' : 'closed')
+  } catch {
+    // Ignore: the toggle still works for this visit.
+  }
+}
 const contactInfo = ref<ContactInfo | null>(null)
 watch(showTemplate, async (open) => {
   if (open && conversation.value) {
@@ -180,58 +197,83 @@ useHead({ title: () => conversation.value?.contact.name ?? '' })
 </script>
 
 <template>
-  <div class="flex min-w-0 flex-1 flex-col bg-slate-100 dark:bg-slate-950">
-    <div v-if="notFound" class="grid flex-1 place-items-center p-6 text-slate-500">
-      {{ $t('errors.not_found') }}
-    </div>
+  <div class="flex min-w-0 flex-1">
+    <div class="flex min-w-0 flex-1 flex-col bg-slate-50">
+      <div v-if="notFound" class="grid flex-1 place-items-center p-6 text-slate-500">
+        {{ $t('errors.not_found') }}
+      </div>
 
-    <template v-else-if="conversation">
-      <ConversationHeader :conversation="conversation" :viewers="viewers" @updated="onUpdated" />
+      <template v-else-if="conversation">
+        <ConversationHeader
+          :conversation="conversation"
+          :viewers="viewers"
+          :panel-open="panelOpen"
+          @updated="onUpdated"
+          @toggle-panel="togglePanel"
+        />
 
-      <div ref="scroller" class="flex-1 space-y-2 overflow-y-auto px-3 py-4 sm:px-6">
-        <div v-if="hasMore" class="flex justify-center">
+        <div ref="scroller" class="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+          <div class="mx-auto flex max-w-3xl flex-col gap-3">
+            <div v-if="hasMore" class="flex justify-center">
+              <button
+                type="button"
+                class="btn-ghost min-h-8 text-xs"
+                :disabled="loadingOlder"
+                @click="loadOlder"
+              >
+                {{ $t('inbox.loadOlder') }}
+              </button>
+            </div>
+            <template v-for="item in timeline" :key="item.key">
+              <MessageBubble
+                v-if="item.kind === 'message'"
+                :message="item.message"
+                @retry="retry"
+              />
+              <NoteBubble v-else :note="item.note" />
+            </template>
+          </div>
+        </div>
+
+        <div
+          v-if="!windowOpen && auth.can('conversations:reply')"
+          class="flex flex-wrap items-center justify-between gap-3 border-t border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-900 md:px-6"
+        >
+          <span>{{
+            conversation.lastInboundAt ? $t('inbox.windowClosed') : $t('inbox.windowNever')
+          }}</span>
           <button
             type="button"
-            class="btn-secondary py-1.5 text-xs"
-            :disabled="loadingOlder"
-            @click="loadOlder"
+            class="btn-primary min-h-9 text-[13px]"
+            @click="showTemplate = true"
           >
-            {{ $t('inbox.loadOlder') }}
+            {{ $t('inbox.sendTemplate') }}
           </button>
         </div>
-        <template v-for="item in timeline" :key="item.key">
-          <MessageBubble v-if="item.kind === 'message'" :message="item.message" @retry="retry" />
-          <NoteBubble v-else :note="item.note" />
-        </template>
-      </div>
+        <MessageComposer
+          v-if="auth.can('conversations:reply') || auth.can('notes:write')"
+          :key="id"
+          :conversation-id="id"
+          :can-reply="auth.can('conversations:reply')"
+          :can-note="auth.can('notes:write')"
+          :window-open="windowOpen"
+          :window-closes-at="conversation.windowClosesAt"
+          @sent="onSent"
+          @noted="onNoted"
+        />
+        <TemplateSender
+          v-if="showTemplate && contactInfo"
+          :contact="contactInfo"
+          @close="showTemplate = false"
+          @sent="showTemplate = false"
+        />
+      </template>
+    </div>
 
-      <div
-        v-if="!windowOpen && auth.can('conversations:reply')"
-        class="flex flex-wrap items-center justify-between gap-2 border-t border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100"
-      >
-        <span>{{
-          conversation.lastInboundAt ? $t('inbox.windowClosed') : $t('inbox.windowNever')
-        }}</span>
-        <button type="button" class="btn-primary py-1.5 text-xs" @click="showTemplate = true">
-          {{ $t('inbox.sendTemplate') }}
-        </button>
-      </div>
-      <MessageComposer
-        v-if="auth.can('conversations:reply') || auth.can('notes:write')"
-        :key="id"
-        :conversation-id="id"
-        :can-reply="auth.can('conversations:reply')"
-        :can-note="auth.can('notes:write')"
-        :window-open="windowOpen"
-        @sent="onSent"
-        @noted="onNoted"
-      />
-      <TemplateSender
-        v-if="showTemplate && contactInfo"
-        :contact="contactInfo"
-        @close="showTemplate = false"
-        @sent="showTemplate = false"
-      />
-    </template>
+    <ContactPanel
+      v-if="conversation && panelOpen"
+      :contact-id="conversation.contact.id"
+      class="hidden xl:flex"
+    />
   </div>
 </template>

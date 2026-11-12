@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Clock3, FileText, Lock, Mic, Paperclip, Send, X } from 'lucide-vue-next'
 import type { InboxMessage, InboxNote } from '~/types/inbox'
 
 const props = defineProps<{
@@ -6,6 +7,8 @@ const props = defineProps<{
   canReply: boolean
   windowOpen: boolean
   canNote: boolean
+  /** When the 24-hour customer service window closes (FR-13). */
+  windowClosesAt?: string | null
 }>()
 const emit = defineEmits<{ sent: [message: InboxMessage]; noted: [note: InboxNote] }>()
 
@@ -15,6 +18,17 @@ const directory = useDirectoryStore()
 const auth = useAuthStore()
 const realtime = useRealtime()
 const { t } = useI18n()
+const { duration } = useFormat()
+const nowMs = ref(Date.now())
+const windowClock = setInterval(() => (nowMs.value = Date.now()), 30_000)
+onBeforeUnmount(() => clearInterval(windowClock))
+const windowRemaining = computed(() =>
+  props.windowClosesAt ? Math.max(0, new Date(props.windowClosesAt).getTime() - nowMs.value) : 0,
+)
+/** Under three hours left: warn in amber. */
+const windowUrgent = computed(
+  () => windowRemaining.value > 0 && windowRemaining.value < 3 * 3600_000,
+)
 
 type Mode = 'reply' | 'note'
 const mode = ref<Mode>(props.canReply && props.windowOpen ? 'reply' : 'note')
@@ -300,95 +314,109 @@ onBeforeUnmount(() => stopRecording(false))
 </script>
 
 <template>
-  <form
-    class="border-t bg-white p-3 dark:bg-slate-900"
-    :class="
-      mode === 'note'
-        ? 'border-amber-300 dark:border-amber-800'
-        : 'border-slate-200 dark:border-slate-800'
-    "
-    @submit.prevent="send"
-  >
-    <div class="mb-2 flex gap-1 text-sm">
-      <button
-        v-if="canReply"
-        type="button"
-        class="rounded-lg px-3 py-1 font-medium"
-        :class="
-          mode === 'reply'
-            ? 'bg-brand-700 text-white'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-        "
-        :disabled="!replyAllowed"
-        @click="mode = 'reply'"
+  <form class="border-t border-slate-200 bg-white px-4 pb-4 pt-2.5 md:px-6" @submit.prevent="send">
+    <div class="mb-2 flex items-center justify-between gap-3">
+      <div class="flex gap-5 text-[13px]" role="tablist">
+        <button
+          v-if="canReply"
+          type="button"
+          role="tab"
+          :aria-selected="mode === 'reply'"
+          class="border-b-2 pb-1 font-medium"
+          :class="
+            mode === 'reply'
+              ? 'border-slate-900 text-slate-900'
+              : 'border-transparent text-slate-500 hover:text-slate-900'
+          "
+          :disabled="!replyAllowed"
+          @click="mode = 'reply'"
+        >
+          {{ $t('inbox.reply') }}
+        </button>
+        <button
+          v-if="canNote"
+          type="button"
+          role="tab"
+          :aria-selected="mode === 'note'"
+          class="flex items-center gap-1.5 border-b-2 pb-1 font-medium"
+          :class="
+            mode === 'note'
+              ? 'border-amber-500 text-amber-800'
+              : 'border-transparent text-slate-500 hover:text-slate-900'
+          "
+          @click="switchToNote"
+        >
+          <Lock class="size-3.5" :stroke-width="1.5" aria-hidden="true" />{{ $t('inbox.note') }}
+        </button>
+      </div>
+      <span
+        v-if="windowOpen && windowClosesAt"
+        class="flex items-center gap-1.5 text-xs"
+        :class="windowUrgent ? 'font-medium text-warn' : 'text-slate-500'"
       >
-        {{ $t('inbox.reply') }}
-      </button>
-      <button
-        v-if="canNote"
-        type="button"
-        class="rounded-lg px-3 py-1 font-medium"
-        :class="
-          mode === 'note'
-            ? 'bg-amber-400 text-amber-950'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-        "
-        @click="switchToNote"
-      >
-        {{ $t('inbox.note') }}
-      </button>
+        <Clock3 class="size-3.5" :stroke-width="1.5" aria-hidden="true" />
+        {{ $t('inbox.windowOpen', { time: duration(windowRemaining) }) }}
+      </span>
     </div>
 
     <p
       v-if="mode === 'reply' && !replyAllowed"
-      class="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100"
+      class="mb-2 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-900"
     >
-      {{ $t('inbox.windowClosed') }}
+      <Clock3 class="size-4 shrink-0" :stroke-width="1.5" aria-hidden="true" />{{
+        $t('inbox.windowClosed')
+      }}
     </p>
 
     <FormAlert :message="error" class="mb-2" />
 
     <div
       v-if="file && !recorder"
-      class="mb-2 flex items-center gap-3 rounded-xl bg-slate-100 p-2 dark:bg-slate-800"
+      class="mb-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"
     >
-      <img v-if="previewUrl" :src="previewUrl" alt="" class="size-12 rounded-lg object-cover" />
-      <span
-        v-else
-        class="grid size-12 place-items-center rounded-lg bg-white text-xl dark:bg-slate-700"
-        >📄</span
-      >
+      <img v-if="previewUrl" :src="previewUrl" alt="" class="size-11 rounded-lg object-cover" />
+      <span v-else class="grid size-11 place-items-center rounded-lg bg-slate-100 text-slate-600">
+        <FileText class="size-5" :stroke-width="1.5" aria-hidden="true" />
+      </span>
       <span class="min-w-0 flex-1 truncate text-sm" dir="auto">{{ file.name }}</span>
       <button
         type="button"
-        class="rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-white dark:hover:bg-slate-700"
+        class="grid size-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900"
         :aria-label="$t('inbox.removeFile')"
         @click="file = null"
       >
-        ✕
+        <X class="size-4" :stroke-width="1.5" aria-hidden="true" />
       </button>
     </div>
 
     <div
       v-if="recorder"
-      class="flex items-center gap-3 rounded-xl bg-rose-50 px-3 py-2 dark:bg-rose-950"
+      class="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2"
     >
       <span class="size-2.5 animate-pulse rounded-full bg-rose-600" aria-hidden="true" />
-      <span class="flex-1 text-sm font-medium text-rose-900 dark:text-rose-100">
+      <span class="num flex-1 text-sm font-medium text-rose-900">
         {{ $t('inbox.recording', { time: recordingLabel }) }}
       </span>
-      <button type="button" class="btn-secondary py-1.5 text-xs" @click="stopRecording(false)">
+      <button type="button" class="btn-ghost min-h-9 text-[13px]" @click="stopRecording(false)">
         {{ $t('inbox.cancelRecording') }}
       </button>
-      <button type="button" class="btn-primary py-1.5 text-xs" @click="stopRecording(true)">
+      <button type="button" class="btn-primary min-h-9 text-[13px]" @click="stopRecording(true)">
         {{ $t('inbox.stopRecording') }}
       </button>
     </div>
 
-    <div v-else class="relative flex items-end gap-2">
+    <div
+      v-else
+      class="relative flex items-end gap-1 rounded-2xl border p-1.5 transition-colors focus-within:border-slate-900 focus-within:ring-3 focus-within:ring-slate-900/10"
+      :class="
+        mode === 'note'
+          ? 'border-dashed border-amber-300 bg-amber-50/50'
+          : 'border-slate-300 bg-white'
+      "
+    >
       <ul
         v-if="suggestionQuery"
-        class="card absolute bottom-full start-0 z-20 mb-2 max-h-64 w-72 max-w-full overflow-y-auto py-1"
+        class="card absolute bottom-full start-0 z-20 mb-2 max-h-64 w-80 max-w-full overflow-y-auto p-1 shadow-lg"
         role="listbox"
       >
         <li v-if="!suggestions.length" class="px-3 py-2 text-sm text-slate-500">
@@ -403,13 +431,13 @@ onBeforeUnmount(() => stopRecording(false))
           :key="s.key"
           role="option"
           :aria-selected="i === activeIndex"
-          class="cursor-pointer px-3 py-2 text-sm"
-          :class="i === activeIndex ? 'bg-brand-50 dark:bg-brand-900/40' : ''"
+          class="flex cursor-pointer items-baseline gap-2 rounded-lg px-3 py-2 text-sm"
+          :class="i === activeIndex ? 'bg-slate-100' : ''"
           @mousedown.prevent="s.apply()"
           @mouseenter="activeIndex = i"
         >
           <span class="font-semibold" dir="auto">{{ s.label }}</span>
-          <span class="ms-2 text-slate-500" dir="auto">{{ s.detail }}</span>
+          <span class="truncate text-slate-500" dir="auto">{{ s.detail }}</span>
         </li>
       </ul>
 
@@ -417,34 +445,26 @@ onBeforeUnmount(() => stopRecording(false))
         <input ref="fileInput" type="file" class="hidden" @change="pickFile" />
         <button
           type="button"
-          class="grid size-10 shrink-0 place-items-center rounded-xl text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-slate-300 dark:hover:bg-slate-800"
+          class="grid size-9 shrink-0 place-items-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-40"
           :title="$t('inbox.attach')"
           :aria-label="$t('inbox.attach')"
           :disabled="!replyAllowed"
           @click="fileInput?.click()"
         >
-          <svg
-            viewBox="0 0 24 24"
-            class="size-5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          >
-            <path
-              d="m21 11-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l8-8"
-            />
-          </svg>
+          <Paperclip class="size-5" :stroke-width="1.5" aria-hidden="true" />
         </button>
       </template>
 
+      <label class="sr-only" for="composer-text">{{
+        mode === 'note' ? $t('inbox.note') : $t('inbox.reply')
+      }}</label>
       <textarea
+        id="composer-text"
         ref="textarea"
         v-model="text"
         rows="1"
         dir="auto"
-        class="input min-h-10 flex-1 resize-none py-2"
-        :class="{ 'border-amber-300 bg-amber-50/60 dark:bg-amber-950/30': mode === 'note' }"
+        class="min-h-9 flex-1 resize-none border-0 bg-transparent px-1.5 py-1.5 text-[15px] leading-6 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
         :placeholder="
           mode === 'note'
             ? $t('inbox.notePlaceholder')
@@ -463,34 +483,32 @@ onBeforeUnmount(() => stopRecording(false))
       <button
         v-if="mode === 'reply' && !text.trim() && !file"
         type="button"
-        class="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-700 text-white hover:bg-brand-800 disabled:opacity-50"
+        class="grid size-9 shrink-0 place-items-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-40"
         :title="$t('inbox.record')"
         :aria-label="$t('inbox.record')"
         :disabled="!replyAllowed || busy"
         @click="startRecording"
       >
-        <svg
-          viewBox="0 0 24 24"
-          class="size-5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-        >
-          <rect x="9" y="3" width="6" height="11" rx="3" />
-          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-        </svg>
+        <Mic class="size-5" :stroke-width="1.5" aria-hidden="true" />
       </button>
       <button
         v-else
         type="submit"
-        class="h-10 shrink-0"
+        class="btn min-h-9 shrink-0 px-3.5"
         :class="
-          mode === 'note' ? 'btn bg-amber-400 text-amber-950 hover:bg-amber-500' : 'btn-primary'
+          mode === 'note'
+            ? 'bg-amber-500 text-amber-950 hover:bg-amber-400'
+            : 'bg-slate-900 text-white hover:bg-slate-800'
         "
         :disabled="!canSend"
       >
-        {{ mode === 'note' ? $t('inbox.addNote') : $t('inbox.send') }}
+        <span>{{ mode === 'note' ? $t('inbox.addNote') : $t('inbox.send') }}</span>
+        <Send
+          v-if="mode === 'reply'"
+          class="size-4 rtl:-scale-x-100"
+          :stroke-width="1.5"
+          aria-hidden="true"
+        />
       </button>
     </div>
   </form>

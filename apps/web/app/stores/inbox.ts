@@ -24,7 +24,8 @@ export const useInboxStore = defineStore('inbox', () => {
   const api = useApi()
   const conversations = ref<ConversationSummary[]>([])
   const counts = ref<Partial<Record<InboxView, number>>>({})
-  const view = ref<InboxView>('mine')
+  // Agents start with their own queue; owners and admins oversee everything.
+  const view = ref<InboxView>(useAuthStore().user?.role === 'AGENT' ? 'mine' : 'all')
   const filters = reactive<InboxFilters>(emptyFilters())
   const loading = ref(false)
   const loaded = ref(false)

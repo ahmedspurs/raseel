@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Lock } from 'lucide-vue-next'
 import type { InboxNote } from '~/types/inbox'
 
 const props = defineProps<{ note: InboxNote }>()
@@ -22,44 +23,33 @@ const parts = computed(() => {
 </script>
 
 <template>
-  <div class="flex justify-center">
+  <!-- Internal notes: dashed amber, a lock, centred — never mistaken for a customer message. -->
+  <div class="flex justify-center py-1">
     <div
-      class="w-full max-w-xl rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-amber-950 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-50"
+      class="flex w-full max-w-xl gap-2.5 rounded-xl border border-dashed border-amber-300 bg-amber-50/70 px-3.5 py-2.5 text-amber-950"
     >
-      <p
-        class="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-amber-800 dark:text-amber-200"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          class="size-3.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <rect x="5" y="11" width="14" height="10" rx="2" />
-          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-        </svg>
-        {{ $t('inbox.noteBadge') }} · {{ note.author?.name ?? '—' }}
-      </p>
-      <p class="whitespace-pre-wrap break-words" dir="auto">
-        <template v-for="(p, i) in parts" :key="i">
-          <span
-            v-if="p.mention"
-            class="rounded px-0.5 font-semibold"
-            :class="
-              p.mention === auth.user?.id
-                ? 'bg-amber-300 text-amber-950'
-                : 'text-amber-800 dark:text-amber-200'
-            "
-            >{{ p.text }}</span
+      <Lock class="mt-1 size-4 shrink-0 text-amber-700" :stroke-width="1.5" aria-hidden="true" />
+      <div class="min-w-0 flex-1">
+        <p class="flex items-baseline justify-between gap-2 text-xs text-amber-800">
+          <span class="font-semibold"
+            >{{ $t('inbox.noteBadge') }} · {{ note.author?.name ?? '—' }}</span
           >
-          <template v-else>{{ p.text }}</template>
-        </template>
-      </p>
-      <p class="mt-1 text-end text-[11px] text-amber-700/80 dark:text-amber-300/80">
-        <time :datetime="note.createdAt">{{ time.format(new Date(note.createdAt)) }}</time>
-      </p>
+          <time class="num" :datetime="note.createdAt">{{
+            time.format(new Date(note.createdAt))
+          }}</time>
+        </p>
+        <p class="mt-0.5 whitespace-pre-wrap break-words text-sm leading-6" dir="auto">
+          <template v-for="(p, i) in parts" :key="i">
+            <span
+              v-if="p.mention"
+              class="font-semibold"
+              :class="p.mention === auth.user?.id ? 'rounded bg-amber-200 px-0.5' : ''"
+              >{{ p.text }}</span
+            >
+            <template v-else>{{ p.text }}</template>
+          </template>
+        </p>
+      </div>
     </div>
   </div>
 </template>

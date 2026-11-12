@@ -202,7 +202,32 @@
     "markAllRead": "Mark all as read",
     "mentionedYou": "{name} mentioned you",
     "sendTemplate": "Send a template",
-    "viewContact": "Contact profile"
+    "viewContact": "Contact profile",
+    "types": {
+      "image": "Photo",
+      "video": "Video",
+      "audio": "Voice note",
+      "document": "Document",
+      "sticker": "Sticker",
+      "location": "Location",
+      "contacts": "Contact",
+      "reaction": "Reaction",
+      "template": "Template"
+    },
+    "whatsappConnected": "WhatsApp connected",
+    "whatsappOff": "WhatsApp not connected",
+    "search": "Search",
+    "details": "Details",
+    "noTasks": "No open tasks",
+    "noDeals": "No deals",
+    "viewAll": "View all",
+    "customerSince": "Customer since {date}",
+    "marketing": "Marketing",
+    "consented": "Consented",
+    "notConsented": "No consent",
+    "addTag": "Add tag",
+    "account": "Account",
+    "emptyView": "No conversations in this view."
   },
   "settings": {
     "title": "Settings",

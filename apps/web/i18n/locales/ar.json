@@ -202,7 +202,32 @@
     "markAllRead": "تعليم الكل كمقروء",
     "mentionedYou": "{name} أشار إليك",
     "sendTemplate": "إرسال قالب",
-    "viewContact": "ملف جهة الاتصال"
+    "viewContact": "ملف جهة الاتصال",
+    "types": {
+      "image": "صورة",
+      "video": "فيديو",
+      "audio": "رسالة صوتية",
+      "document": "مستند",
+      "sticker": "ملصق",
+      "location": "موقع",
+      "contacts": "جهة اتصال",
+      "reaction": "تفاعل",
+      "template": "قالب"
+    },
+    "whatsappConnected": "واتساب متصل",
+    "whatsappOff": "واتساب غير متصل",
+    "search": "بحث",
+    "details": "التفاصيل",
+    "noTasks": "لا مهام مفتوحة",
+    "noDeals": "لا صفقات",
+    "viewAll": "عرض الكل",
+    "customerSince": "عميل منذ {date}",
+    "marketing": "التسويق",
+    "consented": "موافق",
+    "notConsented": "غير موافق",
+    "addTag": "إضافة وسم",
+    "account": "الحساب",
+    "emptyView": "لا توجد محادثات في هذا العرض."
   },
   "settings": {
     "title": "الإعدادات",
