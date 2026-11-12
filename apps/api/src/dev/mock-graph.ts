@@ -45,6 +45,14 @@ export class MockGraph {
   readonly sent: SentMessage[] = []
   readonly reads: string[] = []
   readonly media = new Map<string, StoredMedia>()
+  readonly templates: {
+    id: string
+    name: string
+    language: string
+    category: string
+    status: string
+    components: unknown[]
+  }[] = []
   private failures: InjectedFailure[] = []
   private app: FastifyInstance | null = null
   url = ''
@@ -104,6 +112,37 @@ export class MockGraph {
       return reply
         .code(400)
         .send(graphError(100, `Unsupported get request. Object ${id} does not exist`))
+    })
+
+    app.get('/:version/:waba/message_templates', async (req, reply) => {
+      const { waba } = req.params as { waba: string }
+      if (waba !== this.wabaId) return reply.code(400).send(graphError(100, 'Invalid parameter'))
+      return { data: this.templates, paging: { cursors: {} } }
+    })
+
+    app.post('/:version/:waba/message_templates', async (req, reply) => {
+      const { waba } = req.params as { waba: string }
+      if (waba !== this.wabaId) return reply.code(400).send(graphError(100, 'Invalid parameter'))
+      const body = req.body as {
+        name: string
+        language: string
+        category: string
+        components: unknown[]
+      }
+      if (this.templates.some((t) => t.name === body.name && t.language === body.language)) {
+        return reply.code(400).send(graphError(100, 'Message template already exists'))
+      }
+      const t = { id: String(Date.now()), status: 'PENDING', ...body }
+      this.templates.push(t)
+      return { id: t.id, status: t.status, category: t.category }
+    })
+
+    app.delete('/:version/:waba/message_templates', async (req) => {
+      const { name } = req.query as { name: string }
+      for (let i = this.templates.length - 1; i >= 0; i--) {
+        if (this.templates[i]!.name === name) this.templates.splice(i, 1)
+      }
+      return { success: true }
     })
 
     app.post('/:version/:pnid/messages', async (req, reply) => {

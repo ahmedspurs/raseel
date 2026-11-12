@@ -13,6 +13,7 @@ import { Mailer } from './services/mailer.js'
 import { MediaStorage } from './services/media.js'
 import { OutboundService } from './services/outbound.js'
 import { SettingsService } from './services/settings.js'
+import { TemplateService } from './services/templates.js'
 import { WhatsAppService } from './services/whatsapp.js'
 
 /** Wires up shared services for the API server and the worker. */
@@ -45,6 +46,7 @@ export function createContext(config: Config = loadConfig()): AppContext {
     inbound: new InboundService(messaging),
     outbound: new OutboundService(messaging),
     assignment,
+    templates: new TemplateService(messaging),
   }
 }
 

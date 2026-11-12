@@ -17,6 +17,17 @@ export interface PhoneNumberInfo {
   qualityRating: string | null
 }
 
+/** A message template as returned by the WhatsApp Business Management API. */
+export interface MetaTemplate {
+  id: string
+  name: string
+  language: string
+  category: 'MARKETING' | 'UTILITY' | 'AUTHENTICATION'
+  status: string
+  components: Record<string, unknown>[]
+  rejected_reason?: string
+}
+
 export interface MediaInfo {
   url: string
   mimeType: string
@@ -153,6 +164,38 @@ export class WhatsAppClient {
     const id = res.messages?.[0]?.id
     if (!id) throw new WhatsAppApiError('WhatsApp accepted the request but returned no message id')
     return { waMessageId: id }
+  }
+
+  // ── Message templates (FR-40) ──
+
+  async listTemplates(wabaId: string): Promise<MetaTemplate[]> {
+    const fields = 'id,name,language,category,status,components,rejected_reason'
+    const all: MetaTemplate[] = []
+    let after: string | undefined
+    for (let page = 0; page < 50; page++) {
+      const res = await this.request<{
+        data: MetaTemplate[]
+        paging?: { cursors?: { after?: string }; next?: string }
+      }>(
+        'GET',
+        `${wabaId}/message_templates?fields=${fields}&limit=100${after ? `&after=${encodeURIComponent(after)}` : ''}`,
+      )
+      all.push(...res.data)
+      after = res.paging?.next ? res.paging.cursors?.after : undefined
+      if (!after) break
+    }
+    return all
+  }
+
+  async createTemplate(
+    wabaId: string,
+    template: { name: string; language: string; category: string; components: unknown[] },
+  ): Promise<{ id: string; status: string; category: string }> {
+    return this.request('POST', `${wabaId}/message_templates`, template)
+  }
+
+  async deleteTemplate(wabaId: string, name: string): Promise<void> {
+    await this.request('DELETE', `${wabaId}/message_templates?name=${encodeURIComponent(name)}`)
   }
 
   /** Marks an inbound message as read so the customer sees blue ticks. */

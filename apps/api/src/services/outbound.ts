@@ -7,6 +7,8 @@ import { WhatsAppApiError } from '../whatsapp/errors.js'
 import { messagePreview } from '../whatsapp/parse.js'
 import type { EventBus } from './events.js'
 import type { MediaStorage } from './media.js'
+import { messageSearchText } from './search.js'
+import type { TemplatePayload } from './templates.js'
 import type { WhatsAppService } from './whatsapp.js'
 
 export type OutboundInput =
@@ -19,6 +21,8 @@ export type OutboundInput =
       caption?: string
       replyToMessageId?: string
     }
+
+const MEDIA_TYPES = new Set<MessageType>(['IMAGE', 'VIDEO', 'AUDIO', 'DOCUMENT'])
 
 export class OutboundError extends Error {
   constructor(
@@ -77,6 +81,7 @@ export class OutboundService {
         direction: 'OUTBOUND',
         type,
         body,
+        searchText: messageSearchText(body),
         status: 'QUEUED',
         sentByUserId: userId,
         replyToWaId,
@@ -114,7 +119,7 @@ export class OutboundService {
       const client = await whatsapp.client()
 
       let mediaId = message.mediaId
-      if (message.type !== 'TEXT' && !mediaId) {
+      if (MEDIA_TYPES.has(message.type) && !mediaId) {
         if (!message.mediaPath || !message.mediaMime) {
           throw new WhatsAppApiError('Media file is missing', { code: -2 })
         }
@@ -211,6 +216,10 @@ function toOutbound(message: Message, mediaId: string | null): OutboundMessage {
         type: 'document',
         document: { id: mediaId!, caption, filename: message.mediaFilename ?? undefined },
       }
+    case 'TEMPLATE': {
+      const { template } = message.payload as unknown as TemplatePayload
+      return { type: 'template', template }
+    }
     default:
       throw new WhatsAppApiError(`Cannot send messages of type ${message.type}`, { code: -3 })
   }

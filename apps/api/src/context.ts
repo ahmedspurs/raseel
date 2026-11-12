@@ -12,6 +12,7 @@ import type { Mailer } from './services/mailer.js'
 import type { MediaStorage } from './services/media.js'
 import type { OutboundService } from './services/outbound.js'
 import type { SettingsService } from './services/settings.js'
+import type { TemplateService } from './services/templates.js'
 import type { WhatsAppService } from './services/whatsapp.js'
 
 /** Everything a route or job needs, created once at startup. */
@@ -31,6 +32,7 @@ export interface AppContext {
   inbound: InboundService
   outbound: OutboundService
   assignment: AssignmentService
+  templates: TemplateService
 }
 
 declare module 'fastify' {
