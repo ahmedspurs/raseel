@@ -52,15 +52,18 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  sessions     Session[]
-  teams        TeamMember[]
-  invitations  Invitation[]   @relation("InvitedBy")
-  assigned     Conversation[] @relation("Assignee")
-  sentMessages Message[]
-  notes        Note[]
-  mentions     NoteMention[]
-  auditLogs    AuditLog[]
-  quickReplies QuickReply[]
+  sessions      Session[]
+  teams         TeamMember[]
+  invitations   Invitation[]   @relation("InvitedBy")
+  assigned      Conversation[] @relation("Assignee")
+  sentMessages  Message[]
+  notes         Note[]
+  mentions      NoteMention[]
+  auditLogs     AuditLog[]
+  quickReplies  QuickReply[]
+  deals         Deal[]
+  tasksAssigned Task[]         @relation("TaskAssignee")
+  broadcasts    Broadcast[]
 
   @@map("users")
 }
@@ -164,6 +167,9 @@ model Contact {
 
   tags          ContactTag[]
   conversations Conversation[]
+  deals         Deal[]
+  tasks         Task[]
+  broadcasts    BroadcastRecipient[]
 
   @@index([name])
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "contacts_search_text_trgm_idx")
@@ -296,6 +302,8 @@ model Message {
   waMessageId    String?          @unique @map("wa_message_id")
   /// wamid this message replies to / reacts to.
   replyToWaId    String?          @map("reply_to_wa_id")
+  /// Sent by an automation (away, welcome, keyword rule) rather than a person.
+  automated      Boolean          @default(false)
   status         MessageStatus
   error          Json?
   sentByUserId   String?          @map("sent_by_user_id")
@@ -399,4 +407,181 @@ model WebhookEvent {
 
   @@index([status, receivedAt])
   @@map("webhook_events")
+}
+
+// ───────────────────────────── CRM (FR-33, FR-34, FR-35) ─────────────────────────────
+
+model Pipeline {
+  id        String   @id @default(cuid())
+  name      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  stages Stage[]
+  deals  Deal[]
+
+  @@map("pipelines")
+}
+
+enum StageKind {
+  OPEN
+  WON
+  LOST
+}
+
+model Stage {
+  id         String    @id @default(cuid())
+  pipelineId String    @map("pipeline_id")
+  name       String
+  position   Int       @default(0)
+  kind       StageKind @default(OPEN)
+
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  deals    Deal[]
+
+  @@index([pipelineId, position])
+  @@map("stages")
+}
+
+model Deal {
+  id            String    @id @default(cuid())
+  title         String
+  contactId     String    @map("contact_id")
+  pipelineId    String    @map("pipeline_id")
+  stageId       String    @map("stage_id")
+  /// Deal value in Saudi riyals (SAR), two decimals.
+  valueSar      Decimal   @default(0) @map("value_sar") @db.Decimal(14, 2)
+  ownerId       String?   @map("owner_id")
+  expectedClose DateTime? @map("expected_close") @db.Date
+  position      Int       @default(0)
+  closedAt      DateTime? @map("closed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  contact  Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  stage    Stage    @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  owner    User?    @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  tasks    Task[]
+
+  @@index([stageId, position])
+  @@index([contactId])
+  @@map("deals")
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  dueAt       DateTime? @map("due_at")
+  done        Boolean   @default(false)
+  doneAt      DateTime? @map("done_at")
+  contactId   String?   @map("contact_id")
+  dealId      String?   @map("deal_id")
+  assigneeId  String?   @map("assignee_id")
+  createdById String?   @map("created_by_id")
+  /// Set once the due reminder has been delivered.
+  remindedAt  DateTime? @map("reminded_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  contact  Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  deal     Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  assignee User?    @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([assigneeId, done, dueAt])
+  @@index([done, dueAt, remindedAt])
+  @@map("tasks")
+}
+
+/// FR-35: a saved filter over tags and custom fields, used by broadcasts.
+model Segment {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  filter    Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  broadcasts Broadcast[]
+
+  @@map("segments")
+}
+
+// ───────────────────────────── Broadcasts (FR-42, FR-43) ─────────────────────────────
+
+enum BroadcastStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  COMPLETED
+  CANCELLED
+}
+
+model Broadcast {
+  id             String          @id @default(cuid())
+  name           String
+  templateId     String          @map("template_id")
+  segmentId      String?         @map("segment_id")
+  /// Variable mapping, same shape as a single template send.
+  variables      Json            @default("[]")
+  headerMediaUrl String?         @map("header_media_url")
+  status         BroadcastStatus @default(DRAFT)
+  scheduledAt    DateTime?       @map("scheduled_at")
+  startedAt      DateTime?       @map("started_at")
+  completedAt    DateTime?       @map("completed_at")
+  createdById    String?         @map("created_by_id")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  segment    Segment?             @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  createdBy  User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  recipients BroadcastRecipient[]
+
+  @@index([status, scheduledAt])
+  @@map("broadcasts")
+}
+
+enum RecipientStatus {
+  PENDING
+  QUEUED
+  SKIPPED
+  FAILED
+}
+
+model BroadcastRecipient {
+  id          String          @id @default(cuid())
+  broadcastId String          @map("broadcast_id")
+  contactId   String          @map("contact_id")
+  /// The template message sent; its status gives sent/delivered/read.
+  messageId   String?         @unique @map("message_id")
+  status      RecipientStatus @default(PENDING)
+  error       String?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  broadcast Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([broadcastId, contactId])
+  @@index([broadcastId, status])
+  @@map("broadcast_recipients")
+}
+
+// ───────────────────────────── Automation (FR-52) ─────────────────────────────
+
+enum KeywordMatch {
+  CONTAINS
+  EXACT
+}
+
+/// "If a customer message contains X, then tag / assign / reply."
+model AutomationRule {
+  id        String       @id @default(cuid())
+  name      String
+  keywords  String[]
+  match     KeywordMatch @default(CONTAINS)
+  actions   Json
+  active    Boolean      @default(true)
+  position  Int          @default(0)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  @@map("automation_rules")
 }
