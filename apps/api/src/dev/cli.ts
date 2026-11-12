@@ -35,7 +35,11 @@ const MIME_BY_EXT: Record<string, string> = {
 }
 
 async function mockGraph() {
-  const mock = new MockGraph({ webhookUrl: `${API_URL}/webhooks/whatsapp`, appSecret: APP_SECRET })
+  const mock = new MockGraph({
+    webhookUrl: `${API_URL}/webhooks/whatsapp`,
+    appSecret: APP_SECRET,
+    autoApproveTemplates: true,
+  })
   const url = await mock.start(Number(process.env.PORT ?? 4010), '0.0.0.0')
   console.log(`Mock Graph API listening on ${url}`)
   console.log(`  Phone Number ID: ${mock.phoneNumberId}`)

@@ -17,6 +17,8 @@ export interface MockGraphOptions {
   webhookUrl?: string
   appSecret?: string
   statusDelayMs?: number
+  /** Approve new templates immediately (handy for local demos). */
+  autoApproveTemplates?: boolean
 }
 
 export interface SentMessage {
@@ -132,7 +134,11 @@ export class MockGraph {
       if (this.templates.some((t) => t.name === body.name && t.language === body.language)) {
         return reply.code(400).send(graphError(100, 'Message template already exists'))
       }
-      const t = { id: String(Date.now()), status: 'PENDING', ...body }
+      const t = {
+        id: String(Date.now()),
+        status: this.opts.autoApproveTemplates ? 'APPROVED' : 'PENDING',
+        ...body,
+      }
       this.templates.push(t)
       return { id: t.id, status: t.status, category: t.category }
     })
