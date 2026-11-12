@@ -80,9 +80,13 @@ async function submit() {
         v-for="(label, i) in [$t('setup.stepBusiness'), $t('setup.stepOwner')]"
         :key="label"
         class="flex flex-1 items-center gap-2 rounded-xl px-3 py-2"
-        :class="step === i + 1 ? 'bg-brand-700 text-white' : 'bg-white text-slate-500 dark:bg-slate-900'"
+        :class="
+          step === i + 1 ? 'bg-brand-700 text-white' : 'bg-white text-slate-500 dark:bg-slate-900'
+        "
       >
-        <span class="grid size-5 place-items-center rounded-full bg-white/20 text-xs font-bold">{{ i + 1 }}</span>
+        <span class="grid size-5 place-items-center rounded-full bg-white/20 text-xs font-bold">{{
+          i + 1
+        }}</span>
         {{ label }}
       </li>
     </ol>
@@ -99,7 +103,7 @@ async function submit() {
             maxlength="120"
             autofocus
             :placeholder="$t('setup.businessNamePlaceholder')"
-          >
+          />
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
@@ -122,11 +126,25 @@ async function submit() {
       <template v-else>
         <div>
           <label class="label" for="owner-name">{{ $t('setup.ownerName') }}</label>
-          <input id="owner-name" v-model="form.owner.name" class="input" required maxlength="120" autofocus>
+          <input
+            id="owner-name"
+            v-model="form.owner.name"
+            class="input"
+            required
+            maxlength="120"
+            autofocus
+          />
         </div>
         <div>
           <label class="label" for="owner-email">{{ $t('common.email') }}</label>
-          <input id="owner-email" v-model="form.owner.email" type="email" class="input ltr" required autocomplete="email">
+          <input
+            id="owner-email"
+            v-model="form.owner.email"
+            type="email"
+            class="input ltr"
+            required
+            autocomplete="email"
+          />
         </div>
         <div>
           <label class="label" for="owner-pass">{{ $t('common.password') }}</label>
@@ -139,12 +157,14 @@ async function submit() {
             minlength="10"
             maxlength="128"
             autocomplete="new-password"
-          >
+          />
           <p class="mt-1 text-xs text-slate-500">{{ $t('setup.passwordHint') }}</p>
         </div>
         <FormAlert :message="error" />
         <div class="flex gap-3">
-          <button type="button" class="btn-secondary" @click="step = 1">{{ $t('common.back') }}</button>
+          <button type="button" class="btn-secondary" @click="step = 1">
+            {{ $t('common.back') }}
+          </button>
           <button type="submit" class="btn-primary flex-1" :disabled="busy">
             {{ busy ? $t('common.loading') : $t('setup.finish') }}
           </button>

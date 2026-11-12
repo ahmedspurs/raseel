@@ -23,7 +23,9 @@ const workers = [
 ]
 
 for (const worker of workers) {
-  worker.on('completed', (job, result) => log.info({ queue: job.queueName, result }, 'job completed'))
+  worker.on('completed', (job, result) =>
+    log.info({ queue: job.queueName, result }, 'job completed'),
+  )
   worker.on('failed', (job, err) => log.error({ queue: job?.queueName, err }, 'job failed'))
 }
 log.info({ queues: workers.map((w) => w.name) }, 'worker started')

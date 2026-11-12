@@ -7,8 +7,17 @@ const auth = useAuthStore()
 <template>
   <div class="grid min-h-[calc(100dvh-4.5rem)] place-items-center p-6 md:min-h-dvh">
     <div class="max-w-sm text-center">
-      <div class="mx-auto mb-5 grid size-16 place-items-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
-        <svg viewBox="0 0 24 24" class="size-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+      <div
+        class="mx-auto mb-5 grid size-16 place-items-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="size-8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linejoin="round"
+        >
           <path d="M4 5h16v10h-5l-3 3-3-3H4z" />
         </svg>
       </div>
