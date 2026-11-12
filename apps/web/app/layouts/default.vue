@@ -60,6 +60,9 @@ async function logout() {
           </svg>
           {{ $t(item.label) }}
         </NuxtLink>
+        <div class="flex items-center md:hidden">
+          <MentionsBell />
+        </div>
       </nav>
       <div class="hidden border-t border-slate-200 p-3 md:block dark:border-slate-800">
         <div class="flex items-center gap-3 px-2 py-2">
@@ -74,6 +77,7 @@ async function logout() {
           </div>
         </div>
         <div class="mt-1 flex items-center justify-between">
+          <MentionsBell />
           <LanguageSwitcher />
           <button
             type="button"
