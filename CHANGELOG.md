@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Automation: working hours with an away message, a welcome message with reply buttons, and keyword rules that tag, assign or reply
+- STOP / إيقاف replies withdraw marketing consent automatically
+- Segments by tags, custom fields and language, with live audience counts
+- Broadcasts of approved templates to opted-in segments, now or scheduled, rate limited, with delivery, read and reply reports
+- Deals pipeline (Kanban, SAR) with editable stages, and tasks with due reminders
+- CSV import (Arabic or English headers, Saudi number normalization, explicit consent) and export
+
+### Fixed
+
+- Settings now link to the templates, tags and custom fields pages
+
 ## [0.1.0] - 2026-11-13
 
 First MVP release.

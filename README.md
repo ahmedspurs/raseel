@@ -16,8 +16,8 @@ One WhatsApp Business number, many agents, one shared inbox, on your own server,
 </div>
 
 > [!IMPORTANT]
-> **v0.1 (MVP)** — the shared WhatsApp inbox, contacts and templates are ready to try.
-> Broadcasts, automation and reports are coming in v1.0. Expect rough edges and please
+> **Pre-1.0** — the shared WhatsApp inbox, CRM, templates, broadcasts and automation are ready to
+> try. Reports, the audit log screen and the installable app are coming in v1.0. Please
 > [report issues](https://github.com/ahmedspurs/raseel/issues).
 > See the [roadmap](#roadmap) and star or watch the repo to follow along.
 
@@ -37,16 +37,16 @@ Raseel is built for this case:
 
 ### Features
 
-| Area                     | Status                      | Details                                                                                                                             |
-| ------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Setup and accounts       | ✅ Done                     | Setup wizard, Owner/Admin/Agent/Viewer roles, invitations, teams                                                                    |
-| Security                 | ✅ Done                     | Argon2id passwords, TOTP two-factor, encrypted secrets, audit log, CSRF and rate limits                                             |
-| Deployment               | ✅ Done                     | Docker Compose, automatic HTTPS (Caddy), one-command install and backups                                                            |
-| WhatsApp connection      | ✅ Done                     | Cloud API credentials, signed webhooks, send and receive all message types, delivery ticks, 24-hour window                          |
-| Team inbox               | ✅ Done                     | Realtime inbox, views and filters, assignment and round robin, notes with @mentions, quick replies, collision warnings, voice notes |
-| Contacts and CRM         | ✅ Done (deals: v1.0)       | Contact profiles, tags, custom fields, Arabic-aware search, consent records, data export and deletion                               |
-| Templates and broadcasts | ✅ Templates · 🗓 Broadcasts | Sync and create Meta templates, send with contact-field variables; opt-in broadcasts in v1.0                                        |
-| Automation and reports   | 🗓 Planned                   | Working hours, welcome messages, keyword rules, dashboards                                                                          |
+| Area                     | Status                    | Details                                                                                                                             |
+| ------------------------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Setup and accounts       | ✅ Done                   | Setup wizard, Owner/Admin/Agent/Viewer roles, invitations, teams                                                                    |
+| Security                 | ✅ Done                   | Argon2id passwords, TOTP two-factor, encrypted secrets, audit log, CSRF and rate limits                                             |
+| Deployment               | ✅ Done                   | Docker Compose, automatic HTTPS (Caddy), one-command install and backups                                                            |
+| WhatsApp connection      | ✅ Done                   | Cloud API credentials, signed webhooks, send and receive all message types, delivery ticks, 24-hour window                          |
+| Team inbox               | ✅ Done                   | Realtime inbox, views and filters, assignment and round robin, notes with @mentions, quick replies, collision warnings, voice notes |
+| Contacts and CRM         | ✅ Done                   | Profiles, tags, custom fields, Arabic-aware search, deals pipeline (SAR), tasks and reminders, CSV import/export, consent records   |
+| Templates and broadcasts | ✅ Done                   | Meta templates with contact-field variables; scheduled broadcasts to opted-in segments with delivery and reply reports              |
+| Automation and reports   | ✅ Automation · 🗓 Reports | Working hours and away message, welcome buttons, keyword rules, STOP/إيقاف opt-out; dashboards in v1.0                              |
 
 ### Quick start (self-hosting)
 
@@ -58,7 +58,7 @@ curl -fsSL https://raw.githubusercontent.com/ahmedspurs/raseel/main/scripts/inst
 
 The script asks for your domain, generates secrets in `/opt/raseel/.env`, and starts the stack. Open `https://your-domain` to create the owner account.
 
-See [docs/installation.md](docs/installation.md) for manual installation, updates and backups, and [docs/whatsapp-setup.md](docs/whatsapp-setup.md) to connect your WhatsApp number.
+See [docs/installation.md](docs/installation.md) for manual installation, updates and backups, [docs/whatsapp-setup.md](docs/whatsapp-setup.md) to connect your WhatsApp number, and [docs/broadcasts-and-automation.md](docs/broadcasts-and-automation.md) for campaigns and automation.
 
 ### Architecture
 
@@ -119,7 +119,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions.
 | **WhatsApp core** ✅ | Meta setup, webhook receiver, send/receive text and media, message status       |
 | **Team inbox** ✅    | Real-time inbox, assignment, internal notes, quick replies, conversation status |
 | **CRM · v0.1** ✅    | Contacts, tags, custom fields, search, templates, 24-hour window                |
-| **Automation**       | Auto-assign rules, away message, keyword replies, broadcasts                    |
+| **Automation** ✅    | Auto-assign rules, away message, keyword replies, broadcasts                    |
 | **v1.0**             | Reports, audit log UI, backups, PWA, documentation                              |
 
 ### WhatsApp costs

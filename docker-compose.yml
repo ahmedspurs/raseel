@@ -17,6 +17,7 @@ x-api-env: &api-env
   SMTP_URL: ${SMTP_URL:-}
   MAIL_FROM: ${MAIL_FROM:-Raseel <no-reply@localhost>}
   MEDIA_DIR: /data/media
+  BROADCAST_RATE_PER_SECOND: ${BROADCAST_RATE_PER_SECOND:-20}
 
 services:
   caddy:
