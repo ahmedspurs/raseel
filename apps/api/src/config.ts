@@ -14,6 +14,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1).default('redis://localhost:6379'),
 
+  /** Where downloaded WhatsApp media is stored. */
+  MEDIA_DIR: z.string().default('./uploads'),
+
   /**
    * 32-byte key (base64 or hex) used to encrypt secrets at rest (NFR-08).
    * Generate with: openssl rand -base64 32
