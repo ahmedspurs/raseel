@@ -38,6 +38,7 @@ export default defineNuxtConfig({
     devProxy: {
       '/api': { target: 'http://localhost:4000/api', changeOrigin: true },
       '/health': { target: 'http://localhost:4000/health', changeOrigin: true },
+      '/webhooks': { target: 'http://localhost:4000/webhooks', changeOrigin: true },
       '/socket.io': { target: 'http://localhost:4000/socket.io', ws: true, changeOrigin: true },
     },
   },

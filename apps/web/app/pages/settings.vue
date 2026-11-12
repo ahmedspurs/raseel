@@ -11,6 +11,7 @@ const tabs = computed(() =>
       { to: '/settings/profile', label: 'settings.profile' },
       { to: '/settings/security', label: 'settings.security' },
       { to: '/settings/business', label: 'settings.business', permission: 'settings:manage' },
+      { to: '/settings/whatsapp', label: 'settings.whatsapp', permission: 'whatsapp:manage' },
       { to: '/settings/users', label: 'settings.users', permission: 'users:manage' },
       { to: '/settings/teams', label: 'settings.teams', permission: 'teams:manage' },
     ] as { to: string; label: string; permission?: Permission }[]
