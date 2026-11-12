@@ -1,8 +1,6 @@
 import { z } from 'zod'
 
-const booleanish = z
-  .enum(['true', 'false', '1', '0'])
-  .transform((v) => v === 'true' || v === '1')
+const booleanish = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1')
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -30,6 +28,13 @@ const envSchema = z.object({
   COOKIE_SECURE: booleanish.optional(),
 
   TRUST_PROXY: booleanish.default(true),
+
+  /** Attempts per 15 minutes per IP on login, setup and invitation endpoints (NFR-09). */
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+
+  /** Optional SMTP connection string for invitation emails, e.g. smtp://user:pass@host:587 */
+  SMTP_URL: z.string().optional(),
+  MAIL_FROM: z.string().default('Raseel <no-reply@localhost>'),
 })
 
 export type Config = z.infer<typeof envSchema> & { COOKIE_SECURE: boolean }

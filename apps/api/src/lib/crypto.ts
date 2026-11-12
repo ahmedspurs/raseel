@@ -1,4 +1,10 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+  timingSafeEqual,
+} from 'node:crypto'
 
 const ALGO = 'aes-256-gcm'
 const VERSION = 'v1'
@@ -25,7 +31,9 @@ export class Cipher {
     const cipher = createCipheriv(ALGO, this.key, iv)
     const data = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
     const tag = cipher.getAuthTag()
-    return [VERSION, iv, tag, data].map((p) => (typeof p === 'string' ? p : p.toString('base64url'))).join(':')
+    return [VERSION, iv, tag, data]
+      .map((p) => (typeof p === 'string' ? p : p.toString('base64url')))
+      .join(':')
   }
 
   decrypt(payload: string): string {

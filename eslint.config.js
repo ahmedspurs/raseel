@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/.nuxt/**',
       '**/coverage/**',
       '**/node_modules/**',
+      '**/src/generated/**',
       'apps/web/**',
     ],
   },
