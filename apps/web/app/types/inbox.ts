@@ -46,3 +46,18 @@ export interface InboxMessage {
   sentBy: { id: string; name: string } | null
   createdAt: string
 }
+
+export interface InboxNote {
+  id: string
+  conversationId: string
+  body: string
+  author: { id: string; name: string } | null
+  mentionedUserIds: string[]
+  createdAt: string
+}
+
+export interface PresenceViewer {
+  userId: string
+  name: string
+  typing: boolean
+}

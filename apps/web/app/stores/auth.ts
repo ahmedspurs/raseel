@@ -51,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     await api('/auth/logout', { method: 'POST' }).catch(() => undefined)
+    useRealtime().disconnect()
     user.value = null
     teams.value = []
   }
