@@ -154,6 +154,9 @@ export async function attachRealtime(app: FastifyInstance): Promise<Server> {
           if (note) io.to(STAFF_ROOM).emit('note', { note: noteDto(note) })
           break
         }
+        case 'task.due':
+          io.to(userRoom(event.userId)).emit('task', { taskId: event.taskId, title: event.title })
+          break
         case 'mention.created':
           io.to(userRoom(event.userId)).emit('mention', {
             conversationId: event.conversationId,

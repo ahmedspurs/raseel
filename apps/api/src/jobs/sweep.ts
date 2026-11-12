@@ -7,9 +7,9 @@ import { jobId } from '../lib/queues.js'
  * Job ids are deterministic, so work already queued is not duplicated.
  */
 export async function runSweep(
-  ctx: Pick<AppContext, 'db' | 'queues'>,
+  ctx: Pick<AppContext, 'db' | 'queues' | 'events'>,
   now = new Date(),
-): Promise<{ webhookEvents: number; messages: number }> {
+): Promise<{ webhookEvents: number; messages: number; reminders: number }> {
   const staleBefore = new Date(now.getTime() - 2 * 60_000)
 
   const events = await ctx.db.webhookEvent.findMany({
@@ -30,5 +30,26 @@ export async function runSweep(
     await ctx.queues.send.add('send', { messageId: m.id }, { jobId: jobId('send', m.id) })
   }
 
-  return { webhookEvents: events.length, messages: messages.length }
+  // FR-34: remind assignees once when a task falls due.
+  const due = await ctx.db.task.findMany({
+    where: { done: false, remindedAt: null, dueAt: { lte: now }, assigneeId: { not: null } },
+    select: { id: true, title: true, assigneeId: true },
+    take: 200,
+  })
+  for (const t of due) {
+    await ctx.events.publish({
+      type: 'task.due',
+      taskId: t.id,
+      userId: t.assigneeId!,
+      title: t.title,
+    })
+  }
+  if (due.length) {
+    await ctx.db.task.updateMany({
+      where: { id: { in: due.map((t) => t.id) } },
+      data: { remindedAt: now },
+    })
+  }
+
+  return { webhookEvents: events.length, messages: messages.length, reminders: due.length }
 }

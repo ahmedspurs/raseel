@@ -12,11 +12,13 @@ import { attachRealtime } from './realtime.js'
 import { authRoutes } from './routes/auth.js'
 import { automationRoutes } from './routes/automation.js'
 import { broadcastRoutes } from './routes/broadcasts.js'
+import { contactCsvRoutes } from './routes/contacts-csv.js'
 import { contactRoutes } from './routes/contacts.js'
 import { conversationRoutes, mediaRoutes } from './routes/conversations.js'
 import { healthRoutes } from './routes/health.js'
 import { noteRoutes } from './routes/notes.js'
 import { settingsRoutes } from './routes/settings.js'
+import { salesRoutes } from './routes/sales.js'
 import { setupRoutes } from './routes/setup.js'
 import { templateRoutes } from './routes/templates.js'
 import { teamRoutes } from './routes/teams.js'
@@ -90,10 +92,12 @@ export async function buildApp(ctx: AppContext, opts: FastifyServerOptions = {})
   await app.register(conversationRoutes, { prefix: '/api/conversations' })
   await app.register(mediaRoutes, { prefix: '/api/media' })
   await app.register(noteRoutes, { prefix: '/api' })
+  await app.register(contactCsvRoutes, { prefix: '/api' })
   await app.register(contactRoutes, { prefix: '/api' })
   await app.register(templateRoutes, { prefix: '/api' })
   await app.register(automationRoutes, { prefix: '/api/automation' })
   await app.register(broadcastRoutes, { prefix: '/api' })
+  await app.register(salesRoutes, { prefix: '/api' })
   await app.register(webhookRoutes, { prefix: '/webhooks' })
 
   await attachRealtime(app)

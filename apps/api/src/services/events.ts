@@ -9,6 +9,7 @@ export type RealtimeEvent =
   | { type: 'conversation.updated'; conversationId: string }
   | { type: 'note.created'; conversationId: string; noteId: string }
   | { type: 'mention.created'; conversationId: string; noteId: string; userId: string }
+  | { type: 'task.due'; taskId: string; userId: string; title: string }
 
 /** Publishes over Redis so events raised by the worker reach the API process. */
 export class EventBus {
