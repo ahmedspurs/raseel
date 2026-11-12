@@ -53,6 +53,15 @@ Open **Settings → WhatsApp**, paste the four values and click **Verify and con
 
 Send a WhatsApp message to your business number. The Webhook card in Raseel turns green when the first event arrives, and the conversation appears in the inbox.
 
+## Templates
+
+Customers must write first, and free-form replies are only allowed for 24 hours after their last message. To reach a customer outside that window, or to start a conversation, send an approved **template**:
+
+1. Open **Settings → Templates** and click **Sync from Meta** to import templates you already have, or **New template** to create one. New templates are reviewed by Meta, usually within minutes.
+2. Send a template from a contact's profile, or from a conversation whose window is closed. Variables can be typed or filled from contact fields such as the first name, city or a custom field.
+
+Templates with image, video or document headers can be created in WhatsApp Manager; after syncing, Raseel sends them with a media link you provide.
+
 ## Troubleshooting
 
 | Problem                                 | Fix                                                                                                                                                                                   |

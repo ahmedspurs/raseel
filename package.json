@@ -1,5 +1,6 @@
 {
   "name": "raseel",
+  "version": "0.1.0",
   "private": true,
   "description": "Open-source, self-hosted WhatsApp team inbox and CRM for Arabic-speaking businesses.",
   "license": "AGPL-3.0-only",

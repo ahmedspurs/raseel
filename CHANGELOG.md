@@ -6,8 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-13
+
+First MVP release.
+
 ### Added
 
+- Contacts with profiles, tags, validated custom fields and marketing consent records
+- Arabic-aware search across contacts and messages (ignores tashkeel and alef, taa marbuta and yaa variants)
+- Contact data export and permanent deletion for PDPL requests
+- Message templates: sync from Meta, create and submit for review, send with variables from contact fields
+- Starting conversations with templates and replying with templates after the 24-hour window
+- Inbox filter by contact tag
 - Realtime inbox over Socket.io: new messages, delivery ticks, assignments and notes appear instantly
 - Inbox views (Mine, Unassigned, My teams, All, Closed) with agent, team, status and date filters
 - Assignment to agents and teams, assign-to-me, optional round-robin auto-assignment
@@ -33,3 +43,6 @@ All notable changes to this project are documented here. The format follows
 - Docker Compose deployment with automatic HTTPS, migrations on start, install, update and backup scripts
 - Background worker with scheduled maintenance
 - CI for lint, type checks, tests and Docker builds; image publishing on release tags
+
+[Unreleased]: https://github.com/ahmedspurs/raseel/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ahmedspurs/raseel/releases/tag/v0.1.0

@@ -20,10 +20,9 @@ curl -fsSL https://raw.githubusercontent.com/ahmedspurs/raseel/main/scripts/inst
 
 The script:
 
-1. Creates `/opt/raseel` (override with `RASEEL_DIR=/path`).
-2. Downloads `docker-compose.yml` and the backup script.
-3. Asks for your domain and writes `.env` with freshly generated secrets.
-4. Pulls the images and starts the stack.
+1. Clones Raseel into `/opt/raseel` (override with `RASEEL_DIR=/path`; pick a release with `RASEEL_REF=v0.1.0`).
+2. Asks for your domain and writes `.env` with freshly generated secrets.
+3. Pulls the published images, or builds them on the server if they are not available, and starts the stack.
 
 Open `https://your-domain` and complete the setup wizard to create the owner account.
 
