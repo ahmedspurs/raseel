@@ -36,6 +36,7 @@ export const setupRoutes: FastifyPluginAsync = async (app) => {
             email: input.owner.email,
             passwordHash,
             role: 'OWNER',
+            lastLoginAt: new Date(),
             language: input.business.language,
           },
         })
