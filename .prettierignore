@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+LICENSE
+dist
+.output
+.nuxt
+coverage

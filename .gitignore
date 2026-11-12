@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.output/
+.nuxt/
+.nitro/
+.cache/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+/data/
+/backups/
+apps/api/uploads/
