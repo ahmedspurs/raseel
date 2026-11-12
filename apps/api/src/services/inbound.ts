@@ -9,6 +9,7 @@ import {
 import type { AssignmentService } from './assignment.js'
 import type { EventBus } from './events.js'
 import type { MediaStorage } from './media.js'
+import { contactSearchText, messageSearchText } from './search.js'
 import type { WhatsAppService } from './whatsapp.js'
 
 /** Statuses only move forward; a late "delivered" never overwrites "read". */
@@ -72,11 +73,28 @@ export class InboundService {
     const { db, queues, events } = this.deps
     if (await db.message.findUnique({ where: { waMessageId: m.waMessageId } })) return null
 
-    const contact = await db.contact.upsert({
+    let contact = await db.contact.upsert({
       where: { waId: m.from },
-      create: { waId: m.from, waName: m.profileName },
+      create: {
+        waId: m.from,
+        waName: m.profileName,
+        searchText: contactSearchText({
+          waId: m.from,
+          waName: m.profileName,
+          name: null,
+          email: null,
+          company: null,
+          city: null,
+        }),
+      },
       update: m.profileName ? { waName: m.profileName } : {},
     })
+    if (m.profileName && contact.waName === m.profileName) {
+      const searchText = contactSearchText(contact)
+      if (searchText !== contact.searchText) {
+        contact = await db.contact.update({ where: { id: contact.id }, data: { searchText } })
+      }
+    }
 
     const existing = await db.conversation.findFirst({
       where: { contactId: contact.id },
@@ -94,6 +112,7 @@ export class InboundService {
             direction: 'INBOUND',
             type: m.type,
             body: m.body,
+            searchText: messageSearchText(m.body),
             payload: (m.payload ?? undefined) as Prisma.InputJsonValue | undefined,
             mediaId: m.media?.id,
             mediaMime: m.media?.mimeType,

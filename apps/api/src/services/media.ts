@@ -1,5 +1,5 @@
 import { createReadStream } from 'node:fs'
-import { mkdir, stat, writeFile } from 'node:fs/promises'
+import { mkdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const EXTENSIONS: Record<string, string> = {
@@ -59,5 +59,12 @@ export class MediaStorage {
     const full = this.resolve(relative)
     const info = await stat(full)
     return { stream: createReadStream(full), size: info.size }
+  }
+
+  /** Deletes stored files; missing files are ignored. */
+  async removeMany(relativePaths: string[]): Promise<void> {
+    await Promise.all(
+      relativePaths.map((p) => rm(this.resolve(p), { force: true }).catch(() => undefined)),
+    )
   }
 }

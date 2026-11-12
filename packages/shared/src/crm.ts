@@ -139,11 +139,15 @@ export const templateCreateSchema = z.object({
     .regex(/^[a-z0-9_]{1,512}$/, 'Lowercase letters, numbers and _ only'),
   language: z.string().regex(/^[a-z]{2}(_[A-Z]{2})?$/, 'e.g. ar or en_US'),
   category: z.enum(TEMPLATE_CATEGORIES),
+  /**
+   * Text headers only: media headers need Meta's resumable upload API. Templates with
+   * media headers can be created in WhatsApp Manager and are synced and sent normally.
+   */
   header: z
-    .discriminatedUnion('format', [
-      z.object({ format: z.literal('TEXT'), text: z.string().trim().min(1).max(60) }),
-      z.object({ format: z.enum(['IMAGE', 'VIDEO', 'DOCUMENT']) }),
-    ])
+    .object({
+      text: z.string().trim().min(1).max(60),
+      example: z.string().trim().min(1).max(60).optional(),
+    })
     .optional(),
   body: z.string().trim().min(1).max(1024),
   /** One example value per {{n}} in the body, required by Meta's review. */

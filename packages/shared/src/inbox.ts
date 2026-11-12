@@ -18,6 +18,7 @@ export const conversationListQuerySchema = z.object({
   status: z.enum(['OPEN', 'PENDING']).optional(),
   assigneeId: z.string().optional(),
   teamId: z.string().optional(),
+  tagId: z.string().optional(),
   /** Last activity on or after / on or before these days (UTC). */
   from: isoDate,
   to: isoDate,

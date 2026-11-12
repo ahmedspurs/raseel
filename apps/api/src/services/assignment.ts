@@ -25,7 +25,10 @@ const ROUND_ROBIN_KEY = 'raseel:inbox:round-robin'
 
 /** FR-14: maps an inbox view and filters to a database query for one user. */
 export function conversationWhere(
-  q: Pick<ConversationListQuery, 'view' | 'status' | 'assigneeId' | 'teamId' | 'from' | 'to'>,
+  q: Pick<
+    ConversationListQuery,
+    'view' | 'status' | 'assigneeId' | 'teamId' | 'tagId' | 'from' | 'to'
+  >,
   user: Pick<User, 'id'>,
   teamIds: string[],
 ): Prisma.ConversationWhereInput {
@@ -36,6 +39,7 @@ export function conversationWhere(
   if (q.view === 'team') where.teamId = { in: teamIds }
   if (q.assigneeId) where.assigneeId = q.assigneeId
   if (q.teamId) where.teamId = q.teamId
+  if (q.tagId) where.contact = { tags: { some: { tagId: q.tagId } } }
   if (q.from || q.to) {
     where.lastMessageAt = {
       ...(q.from ? { gte: new Date(`${q.from}T00:00:00.000Z`) } : {}),

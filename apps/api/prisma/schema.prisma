@@ -2,13 +2,16 @@
 
 generator client {
   provider            = "prisma-client"
+  previewFeatures     = ["postgresqlExtensions"]
   output              = "../src/generated/prisma"
   moduleFormat        = "esm"
   importFileExtension = "js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  /// pg_trgm powers Arabic-aware substring search (FR-20).
+  extensions = [pg_trgm]
 }
 
 // ───────────────────────────── Workspace & users ─────────────────────────────
@@ -154,6 +157,8 @@ model Contact {
   optInMarketing Boolean   @default(false) @map("opt_in_marketing")
   optedInAt      DateTime? @map("opted_in_at")
   optedOutAt     DateTime? @map("opted_out_at")
+  /// Normalized name, number, email and company for search (see normalizeSearch).
+  searchText     String    @default("") @map("search_text")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
@@ -161,7 +166,28 @@ model Contact {
   conversations Conversation[]
 
   @@index([name])
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "contacts_search_text_trgm_idx")
   @@map("contacts")
+}
+
+/// FR-31: business-defined contact fields; values live in Contact.customFields.
+model CustomField {
+  id        String          @id @default(cuid())
+  key       String          @unique
+  label     String
+  type      CustomFieldType
+  options   String[]
+  position  Int             @default(0)
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  @@map("custom_fields")
+}
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  SELECT
 }
 
 model Tag {
@@ -273,6 +299,8 @@ model Message {
   status         MessageStatus
   error          Json?
   sentByUserId   String?          @map("sent_by_user_id")
+  /// Normalized body for search; null for messages without text.
+  searchText     String?          @map("search_text")
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
 
@@ -280,6 +308,7 @@ model Message {
   sentBy       User?        @relation(fields: [sentByUserId], references: [id], onDelete: SetNull)
 
   @@index([conversationId, createdAt])
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "messages_search_text_trgm_idx")
   @@map("messages")
 }
 
