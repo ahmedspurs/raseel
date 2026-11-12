@@ -2,20 +2,64 @@
 @import '@fontsource/ibm-plex-sans-arabic/500.css';
 @import '@fontsource/ibm-plex-sans-arabic/600.css';
 @import '@fontsource/ibm-plex-sans-arabic/700.css';
+@import '@fontsource/noto-kufi-arabic/600.css';
+@import '@fontsource/noto-kufi-arabic/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 @import 'tailwindcss';
 
+/*
+ * Raseel design system v1 — "ink first".
+ * Warm greys and ink carry the interface; colour is reserved for meaning:
+ * green = connected/active, amber = the 24-hour window and internal notes,
+ * red = destructive or failed, blue = read receipts.
+ */
 @theme {
   --font-sans:
     'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+  /* Warm neutral scale replaces Tailwind's cool slate everywhere. */
+  --color-slate-50: #f7f7f5;
+  --color-slate-100: #f0efea;
+  --color-slate-200: #e4e2dc;
+  --color-slate-300: #d6d3cc;
+  --color-slate-400: #a3a6ad;
+  --color-slate-500: #5e626a;
+  --color-slate-600: #4a4e55;
+  --color-slate-700: #3a3d44;
+  --color-slate-800: #2b2d33;
+  --color-slate-900: #17181b;
+  --color-slate-950: #0f1012;
+
+  /* "brand" is ink for actions and selection; green only as a quiet tint. */
+  --color-brand-50: #f0efea;
+  --color-brand-100: #dce9e3;
+  --color-brand-200: #b9d3c7;
+  --color-brand-500: #22a06b;
+  --color-brand-600: #17181b;
+  --color-brand-700: #17181b;
+  --color-brand-800: #2b2d33;
+  --color-brand-900: #0e3b2d;
+
+  --color-ink: #17181b;
+  --color-ground: #f7f7f5;
+  --color-line: #e4e2dc;
+  --color-active: #22a06b;
+  --color-raseel: #0e6b4f;
+  --color-warn: #b45309;
+  --color-read: #2563eb;
+
+  /* Restrained corners: 6 / 8 / 10, nothing larger except avatars. */
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
+  --radius-3xl: 12px;
+
+  --shadow-xs: 0 1px 1px rgb(23 24 27 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(23 24 27 / 0.06);
+  --shadow-lg: 0 10px 30px -8px rgb(23 24 27 / 0.18);
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -25,7 +69,23 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-feature-settings: 'kern';
+    line-height: 1.6;
+  }
+  h1,
+  h2 {
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    font-family: var(--font-display);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: #dce9e3;
   }
   /* Keep phone numbers, emails and codes left-to-right inside Arabic text. */
   .ltr {
@@ -39,33 +99,44 @@
 }
 
 @utility card {
-  @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  @apply rounded-2xl border border-slate-200 bg-white;
 }
 @utility label {
-  @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300;
+  @apply mb-1.5 block text-[13px] font-medium text-slate-600;
+}
+@utility kicker {
+  @apply text-[13px] font-semibold text-slate-500;
+}
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 @utility input {
-  @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm
-    shadow-xs outline-none transition placeholder:text-slate-400
-    focus:border-brand-600 focus:ring-4 focus:ring-brand-600/15
-    disabled:cursor-not-allowed disabled:bg-slate-100
-    dark:border-slate-700 dark:bg-slate-950 dark:focus:border-brand-500;
+  @apply block min-h-10 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm
+    text-slate-900 outline-none transition-colors placeholder:text-slate-400
+    focus:border-slate-900 focus:ring-3 focus:ring-slate-900/10
+    disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500;
 }
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
-    transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold
+    transition-colors disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility btn-primary {
-  @apply btn bg-brand-700 text-white hover:bg-brand-800 focus-visible:ring-brand-600/30;
+  @apply btn bg-slate-900 text-white hover:bg-slate-800;
 }
 @utility btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50
-    focus-visible:ring-slate-400/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200
-    dark:hover:bg-slate-800;
+  @apply btn border border-slate-300 bg-white text-slate-900 hover:bg-slate-50;
+}
+@utility btn-ghost {
+  @apply btn px-3 font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900;
 }
 @utility btn-danger {
-  @apply btn bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30;
+  @apply btn border border-rose-200 bg-white text-rose-700 hover:bg-rose-50;
 }
 @utility badge {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  @apply inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-0.5
+    text-xs font-medium text-slate-600;
+}
+@utility dot {
+  @apply inline-block size-1.5 shrink-0 rounded-full;
 }

@@ -1,5 +1,8 @@
 import tailwindcss from '@tailwindcss/vite'
 
+/** Where the dev server forwards API calls; override when port 4000 is taken. */
+const api = process.env.RASEEL_API_ORIGIN ?? 'http://localhost:4000'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-11-01',
   // The inbox is an authenticated app: render on the client and ship static files that
@@ -36,10 +39,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     devProxy: {
-      '/api': { target: 'http://localhost:4000/api', changeOrigin: true },
-      '/health': { target: 'http://localhost:4000/health', changeOrigin: true },
-      '/webhooks': { target: 'http://localhost:4000/webhooks', changeOrigin: true },
-      '/socket.io': { target: 'http://localhost:4000/socket.io', ws: true, changeOrigin: true },
+      '/api': { target: `${api}/api`, changeOrigin: true },
+      '/health': { target: `${api}/health`, changeOrigin: true },
+      '/webhooks': { target: `${api}/webhooks`, changeOrigin: true },
+      '/socket.io': { target: `${api}/socket.io`, ws: true, changeOrigin: true },
     },
   },
   typescript: { strict: true },
