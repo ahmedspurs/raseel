@@ -11,6 +11,7 @@ export const SettingKey = {
   WhatsAppAppSecret: 'whatsapp.app_secret',
   WhatsAppVerifyToken: 'whatsapp.verify_token',
   WhatsAppFirstWebhookAt: 'whatsapp.first_webhook_at',
+  WhatsAppPhone: 'whatsapp.phone',
   AutoAssign: 'inbox.auto_assign',
   AutoAssignCursor: 'inbox.auto_assign_cursor',
 } as const
@@ -22,8 +23,14 @@ const SECRET_KEYS = new Set<string>([
   SettingKey.WhatsAppVerifyToken,
 ])
 
+/**
+ * The API and the worker are separate processes, so cached values expire quickly
+ * to pick up changes made by the other process (e.g. a new WhatsApp token).
+ */
+const CACHE_TTL_MS = 15_000
+
 export class SettingsService {
-  private cache = new Map<string, string | null>()
+  private cache = new Map<string, { value: string | null; expiresAt: number }>()
 
   constructor(
     private readonly db: Db,
@@ -31,11 +38,16 @@ export class SettingsService {
   ) {}
 
   async get(key: string): Promise<string | null> {
-    if (this.cache.has(key)) return this.cache.get(key) ?? null
+    const cached = this.cache.get(key)
+    if (cached && cached.expiresAt > Date.now()) return cached.value
     const row = await this.db.setting.findUnique({ where: { key } })
     const value = row ? (row.encrypted ? this.cipher.decrypt(row.value) : row.value) : null
-    this.cache.set(key, value)
+    this.remember(key, value)
     return value
+  }
+
+  private remember(key: string, value: string | null) {
+    this.cache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS })
   }
 
   async getJson<T>(key: string): Promise<T | null> {
@@ -51,7 +63,7 @@ export class SettingsService {
       create: { key, value: stored, encrypted },
       update: { value: stored, encrypted },
     })
-    this.cache.set(key, value)
+    this.remember(key, value)
   }
 
   async setJson(key: string, value: unknown): Promise<void> {
