@@ -17,7 +17,8 @@ One WhatsApp Business number, many agents, one shared inbox, on your own server,
 
 > [!IMPORTANT]
 > Raseel is under active development and **not ready for production use yet**.
-> The foundation (accounts, roles, setup, deployment) is done; the WhatsApp inbox is being built now.
+> Accounts, roles, deployment and the WhatsApp connection (send and receive) work today;
+> the full team inbox (assignment, notes, realtime) is being built now.
 > See the [roadmap](#roadmap) and star or watch the repo to follow along.
 
 ## English
@@ -36,16 +37,16 @@ Raseel is built for this case:
 
 ### Features
 
-| Area                     | Status         | Details                                                                                 |
-| ------------------------ | -------------- | --------------------------------------------------------------------------------------- |
-| Setup and accounts       | ✅ Done        | Setup wizard, Owner/Admin/Agent/Viewer roles, invitations, teams                        |
-| Security                 | ✅ Done        | Argon2id passwords, TOTP two-factor, encrypted secrets, audit log, CSRF and rate limits |
-| Deployment               | ✅ Done        | Docker Compose, automatic HTTPS (Caddy), one-command install and backups                |
-| WhatsApp connection      | 🚧 In progress | Cloud API credentials, signed webhooks, send and receive all message types              |
-| Team inbox               | 🗓 Planned      | Real-time inbox, assignment and round robin, notes with @mentions, quick replies        |
-| Contacts and CRM         | 🗓 Planned      | Contact profiles, tags, custom fields, deals pipeline, tasks                            |
-| Templates and broadcasts | 🗓 Planned      | Template sync, opt-in only broadcasts, automatic opt-out                                |
-| Automation and reports   | 🗓 Planned      | Working hours, welcome messages, keyword rules, dashboards                              |
+| Area                     | Status         | Details                                                                                                    |
+| ------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| Setup and accounts       | ✅ Done        | Setup wizard, Owner/Admin/Agent/Viewer roles, invitations, teams                                           |
+| Security                 | ✅ Done        | Argon2id passwords, TOTP two-factor, encrypted secrets, audit log, CSRF and rate limits                    |
+| Deployment               | ✅ Done        | Docker Compose, automatic HTTPS (Caddy), one-command install and backups                                   |
+| WhatsApp connection      | ✅ Done        | Cloud API credentials, signed webhooks, send and receive all message types, delivery ticks, 24-hour window |
+| Team inbox               | 🚧 In progress | Real-time inbox, assignment and round robin, notes with @mentions, quick replies                           |
+| Contacts and CRM         | 🗓 Planned      | Contact profiles, tags, custom fields, deals pipeline, tasks                                               |
+| Templates and broadcasts | 🗓 Planned      | Template sync, opt-in only broadcasts, automatic opt-out                                                   |
+| Automation and reports   | 🗓 Planned      | Working hours, welcome messages, keyword rules, dashboards                                                 |
 
 ### Quick start (self-hosting)
 
@@ -60,7 +61,7 @@ The script asks for your domain, generates secrets in `/opt/raseel/.env`, and st
 > [!NOTE]
 > Prebuilt images are published with the first release. Until then, clone the repository and run `docker compose up -d --build` after creating `.env` from [`.env.example`](.env.example).
 
-See [docs/installation.md](docs/installation.md) for manual installation, updates and backups.
+See [docs/installation.md](docs/installation.md) for manual installation, updates and backups, and [docs/whatsapp-setup.md](docs/whatsapp-setup.md) to connect your WhatsApp number.
 
 ### Architecture
 
@@ -93,6 +94,18 @@ pnpm --filter @raseel/api db:migrate
 pnpm dev                                  # web on :3000, API on :4000
 ```
 
+**Try it without a Meta account.** Raseel ships a mock WhatsApp Cloud API and a webhook simulator:
+
+```bash
+pnpm --filter @raseel/api dev:mock-graph     # fake Graph API on :4010 (prints test credentials)
+# add WHATSAPP_GRAPH_URL=http://localhost:4010 to apps/api/.env, run `pnpm dev` and `pnpm --filter @raseel/api worker`
+# connect WhatsApp in Settings with the printed credentials, then:
+pnpm --filter @raseel/api dev:simulate -- --from 966500000001 --name "Sara" --text "مرحبا"
+pnpm --filter @raseel/api dev:simulate -- --from 966500000001 --file ./photo.jpg --caption "invoice"
+```
+
+Replies you send are accepted by the mock, which then reports sent, delivered and read back to Raseel.
+
 Run the checks:
 
 ```bash
@@ -103,14 +116,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions.
 
 ### Roadmap
 
-| Milestone         | Scope                                                                           |
-| ----------------- | ------------------------------------------------------------------------------- |
-| **Foundation** ✅ | Monorepo, CI, Docker, database schema, auth, roles, setup wizard                |
-| **WhatsApp core** | Meta setup, webhook receiver, send/receive text and media, message status       |
-| **Team inbox**    | Real-time inbox, assignment, internal notes, quick replies, conversation status |
-| **CRM · v0.1**    | Contacts, tags, custom fields, search, templates, 24-hour window                |
-| **Automation**    | Auto-assign rules, away message, keyword replies, broadcasts                    |
-| **v1.0**          | Reports, audit log UI, backups, PWA, documentation                              |
+| Milestone            | Scope                                                                           |
+| -------------------- | ------------------------------------------------------------------------------- |
+| **Foundation** ✅    | Monorepo, CI, Docker, database schema, auth, roles, setup wizard                |
+| **WhatsApp core** ✅ | Meta setup, webhook receiver, send/receive text and media, message status       |
+| **Team inbox**       | Real-time inbox, assignment, internal notes, quick replies, conversation status |
+| **CRM · v0.1**       | Contacts, tags, custom fields, search, templates, 24-hour window                |
+| **Automation**       | Auto-assign rules, away message, keyword replies, broadcasts                    |
+| **v1.0**             | Reports, audit log UI, backups, PWA, documentation                              |
 
 ### WhatsApp costs
 
@@ -130,7 +143,7 @@ Raseel itself is free. Meta bills your business directly for WhatsApp conversati
 
 رسيل صندوق واتساب مشترك ونظام CRM خفيف، مفتوح المصدر، تثبّته على سيرفرك الخاص. يحل مشكلة الرقم الواحد الذي يستخدمه عدة موظفين: كل الرسائل في مكان واحد، وكل عميل له سجل كامل، بالعربي والإنجليزي، ومن غير رسوم شهرية على كل مستخدم.
 
-> **تنبيه:** المشروع قيد التطوير وغير جاهز للاستخدام الفعلي بعد. الأساس جاهز (الحسابات، الصلاحيات، الإعداد، النشر)، وصندوق الواتساب قيد البناء الآن.
+> **تنبيه:** المشروع قيد التطوير وغير جاهز للاستخدام الفعلي بعد. الحسابات والصلاحيات والنشر وربط واتساب (إرسال واستقبال) تعمل الآن، وصندوق الفريق الكامل (التوزيع والملاحظات والتحديث اللحظي) قيد البناء.
 
 ### المزايا
 
@@ -152,7 +165,7 @@ curl -fsSL https://raw.githubusercontent.com/ahmedspurs/raseel/main/scripts/inst
 
 <div dir="rtl">
 
-السكربت يسألك عن الدومين، ويولّد المفاتيح السرية، ويشغّل النظام. افتح الدومين في المتصفح وأنشئ حساب المالك.
+السكربت يسألك عن الدومين، ويولّد المفاتيح السرية، ويشغّل النظام. افتح الدومين في المتصفح وأنشئ حساب المالك، ثم اتبع [دليل ربط واتساب](docs/whatsapp-setup.md).
 
 ### تكلفة واتساب
 
